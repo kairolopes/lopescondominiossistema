@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import path from 'path';
 import { config } from './config/env';
 import webhookRoutes from './controllers/webhook';
 import adminRoutes from './controllers/admin';
