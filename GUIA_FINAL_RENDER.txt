@@ -1,0 +1,36 @@
+========================================================
+GUIA FINAL: TUDO NO RENDER (ROBÔ + SITE)
+========================================================
+
+Parabéns! Agora seu sistema está configurado para rodar 100% no Render.
+Você terá apenas UM LINK para tudo (Site e Robô).
+
+PASSO 1: ENVIAR PARA O GITHUB
+--------------------------------------------------------
+1. Na pasta do projeto, dê dois cliques no arquivo:
+   👉 ATUALIZAR_GITHUB.bat
+
+2. Aguarde a janela preta fechar sozinha.
+
+PASSO 2: CONFIGURAR NO RENDER
+--------------------------------------------------------
+1. Acesse seu painel no Render (dashboard.render.com).
+2. Se você já tinha criado serviços antes, pode apagá-los para não confundir.
+3. Clique em "New +" > "Web Service".
+4. Conecte seu repositório do GitHub (lopes-bot).
+5. O Render vai detectar a configuração automaticamente (lopes-bot).
+6. Clique em "Create Web Service".
+
+PASSO 3: VARIÁVEIS DE AMBIENTE (ENV)
+--------------------------------------------------------
+No painel do seu novo serviço no Render, vá em "Environment":
+Adicione as variáveis do Z-API:
+- ZAPI_INSTANCE_ID
+- ZAPI_TOKEN
+- ZAPI_CLIENT_TOKEN
+(Copie os valores que você já tem).
+
+PRONTO! 🚀
+O Render vai construir tudo. Quando terminar, você verá um link (ex: https://lopes-bot.onrender.com).
+- Esse link abre o Painel.
+- Esse mesmo link serve para o Webhook do Z-API.

@@ -18,8 +18,15 @@ app.use('/api', webhookRoutes);
 // Protect Admin Routes with Authentication
 app.use('/api/admin', authenticateJWT, adminRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Lopes Condomínios Bot API is running');
+// Serve Static Files (Dashboard)
+app.use(express.static(path.join(__dirname, '../dashboard/dist')));
+
+// Handle React Routing (SPA) - Serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'Not Found' });
+  }
+  res.sendFile(path.join(__dirname, '../dashboard/dist/index.html'));
 });
 
 // Start Campaign Engine Loop (every 60 seconds)

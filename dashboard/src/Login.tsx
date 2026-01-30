@@ -5,6 +5,9 @@ interface LoginProps {
     onLogin: (token: string, user: any) => void;
 }
 
+const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3006');
+const AUTH_URL = `${BASE_URL}/api/auth`;
+
 export function Login({ onLogin }: LoginProps) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,7 +18,7 @@ export function Login({ onLogin }: LoginProps) {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:3005/api/auth/login', {
+            const res = await fetch(`${AUTH_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })

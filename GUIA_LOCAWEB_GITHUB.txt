@@ -1,0 +1,48 @@
+
+=== GUIA COMPLETO: HOSPEDAGEM NA LOCAWEB + RENDER ===
+
+Você quer usar seu domínio (lopescondominios.com.br) e não quer tirar o site atual do ar.
+Aqui está a solução PROFISSIONAL e SEM CONFIGURAÇÃO complexa.
+
+---
+
+PARTE 1: O PAINEL DE CONTROLE (DASHBOARD)
+Onde você vê as conversas e dispara mensagens.
+
+1. Na pasta do projeto, entre em "dashboard" > "dist".
+2. Lá tem um arquivo "index.html" e uma pasta "assets".
+3. Abra seu FTP da Locaweb (FileZilla ou Painel).
+4. Crie uma pasta chamada "sistema" (ou "admin") dentro da pasta pública do seu site (geralmente "public_html" ou "www").
+5. Jogue o conteúdo da pasta "dist" para dentro dessa pasta "sistema".
+
+RESULTADO:
+Seu site continua normal em: www.lopescondominios.com.br
+Seu painel ficará em: www.lopescondominios.com.br/sistema
+
+*NOTA: Antes de subir, garanta que o arquivo dashboard/src/App.tsx esteja apontando para o link do BOT (Parte 2).*
+
+---
+
+PARTE 2: O ROBÔ (CÉREBRO)
+A Locaweb (hospedagem comum) NÃO roda robôs de WhatsApp 24h. Ela só serve para sites.
+Para o robô funcionar sem seu PC ligado, usamos o RENDER (que é grátis/barato e profissional).
+
+JÁ INSTALEI O GIT PARA VOCÊ! AGORA É SÓ ENVIAR:
+
+1. Crie um repositório vazio no GitHub.com.
+2. Dê dois cliques no arquivo "enviar_para_github.bat" que criei na pasta.
+3. Cole o link do repositório quando pedir.
+4. Vá no Render.com, crie um "Web Service" e conecte o GitHub.
+
+RESULTADO:
+O Render vai te dar um link (ex: https://lopes-bot.onrender.com).
+Esse link você coloca na Z-API.
+
+---
+
+RESUMO DO PLANO "FAÇA TUDO":
+1. Site atual: INTACTO.
+2. Painel Admin: www.lopescondominios.com.br/sistema (Hospedado na Locaweb).
+3. Robô: https://lopes-bot.onrender.com (Hospedado no Render, invisível pro usuário).
+
+Essa é a arquitetura que grandes empresas usam. O site fica num lugar, o sistema em outro, tudo integrado.

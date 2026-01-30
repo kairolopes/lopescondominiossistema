@@ -24,8 +24,9 @@ interface User {
   department: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3006/api/admin';
-const AUTH_URL = import.meta.env.VITE_AUTH_URL || 'http://localhost:3006/api/auth';
+const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3006');
+const API_URL = `${BASE_URL}/api/admin`;
+const AUTH_URL = `${BASE_URL}/api/auth`;
 
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
