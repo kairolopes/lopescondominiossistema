@@ -1,0 +1,8 @@
+
+node_modules
+dist
+.env
+URL_DO_WEBHOOK.txt
+coverage
+*.log
+.DS_Store

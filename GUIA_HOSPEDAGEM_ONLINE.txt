@@ -1,0 +1,51 @@
+
+=== COMO COLOCAR O ROBÔ NA INTERNET (E SE LIVRAR DO NGROK) ===
+
+Você perguntou se usar a Netlify resolve. A resposta curta é:
+PARA O SITE (DASHBOARD): SIM!
+PARA O ROBÔ (BACKEND): NÃO (Você precisa do Render ou Railway).
+
+Se você hospedar online, NÃO PRECISA MAIS DE NGROK. O link será fixo e nunca mais vai mudar.
+
+---
+
+PASSO 1: HOSPEDAR O ROBÔ (BACKEND)
+O "cérebro" do robô precisa de um servidor ligado 24h. A melhor opção grátis/barata é o RENDER.
+
+1. Crie uma conta no GitHub (github.com) se não tiver.
+2. Baixe o GitHub Desktop e suba esse projeto para lá.
+3. Crie uma conta no Render (render.com).
+4. Clique em "New +", selecione "Web Service".
+5. Conecte sua conta do GitHub e escolha o repositório "lopescondominios".
+6. O Render vai ler o arquivo "render.yaml" que eu criei e configurar quase tudo.
+7. Você só vai precisar preencher as "Environment Variables" (Variáveis de Ambiente) com os dados da Z-API:
+   - ZAPI_INSTANCE_ID
+   - ZAPI_TOKEN
+   - ZAPI_CLIENT_TOKEN
+
+RESULTADO: Você ganhará um link tipo: https://lopes-bot.onrender.com
+Esse será seu link para sempre. Na Z-API você colocará: https://lopes-bot.onrender.com/api/webhook/zapi
+
+---
+
+PASSO 2: HOSPEDAR O DASHBOARD (TELA)
+Agora que o robô está online, subimos a tela para a Netlify.
+
+1. Crie conta na Netlify (netlify.com).
+2. Arraste a pasta "dashboard/dist" (você precisa rodar "npm run build" dentro da pasta dashboard antes) para a Netlify.
+   OU conecte com GitHub igual no Render.
+3. Nas configurações da Netlify, defina as variáveis de ambiente:
+   - VITE_API_URL = https://lopes-bot.onrender.com/api/admin
+   - VITE_AUTH_URL = https://lopes-bot.onrender.com/api/auth
+
+RESULTADO: Você acessa o painel por algo como: https://lopes-condominios.netlify.app
+
+---
+
+RESUMO:
+- Hospedar online elimina o Ngrok.
+- Elimina o problema de "Porta em uso".
+- O link nunca muda.
+- O computador pode ser desligado e o robô continua funcionando.
+
+Se quiser fazer isso agora, precisa subir o código para o GitHub primeiro. Quer ajuda com isso?
