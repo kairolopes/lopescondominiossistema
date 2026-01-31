@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { campaignService } from '../services/campaign';
 import { db } from '../config/firebase';
 
@@ -110,17 +110,15 @@ export const adminController = {
     }
 };
 
-export default (router: any) => {
-    const express = require('express');
-    const r = express.Router();
-    
-    // Chat endpoints
-    r.get('/conversations', adminController.getConversations);
-    r.get('/sessions', adminController.getSessions); // Added for frontend compatibility
-    r.get('/conversations/:phone/messages', adminController.getMessages);
-    
-    // Campaign endpoints
-    r.get('/campaigns', adminController.getCampaigns);
-    r.post('/campaigns', adminController.createCampaign);
-    return r;
-};
+const router = express.Router();
+
+// Chat endpoints
+router.get('/conversations', adminController.getConversations);
+router.get('/sessions', adminController.getSessions); // Added for frontend compatibility
+router.get('/conversations/:phone/messages', adminController.getMessages);
+
+// Campaign endpoints
+router.get('/campaigns', adminController.getCampaigns);
+router.post('/campaigns', adminController.createCampaign);
+
+export default router;
