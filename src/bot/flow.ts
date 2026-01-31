@@ -25,6 +25,12 @@ export const botFlow = {
         session = sessionManager.createSession(phone, senderName);
       }
 
+      // If session is PAUSED (Human Intervention), do not process
+      if (session.state === 'PAUSED') {
+          console.log(`[Flow] Session PAUSED for ${phone}. Human intervention active.`);
+          return;
+      }
+
       // 2. State Machine
       switch (session.state) {
         case 'IDLE':

@@ -114,8 +114,10 @@ const router = express.Router();
 
 // Chat endpoints
 router.get('/conversations', adminController.getConversations);
-router.get('/sessions', adminController.getSessions); // Added for frontend compatibility
+router.get('/sessions', adminController.getSessions);
 router.get('/conversations/:phone/messages', adminController.getMessages);
+router.post('/messages/send', adminController.sendMessage);
+router.post('/sessions/:phone/status', adminController.updateSessionStatus);
 
 // Campaign endpoints
 router.get('/campaigns', adminController.getCampaigns);

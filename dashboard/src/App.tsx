@@ -5,6 +5,7 @@ import { KanbanBoard } from './components/KanbanBoard';
 interface Session {
   phone: string;
   step: string;
+  status?: string; // 'active' | 'paused'
   tags: string[];
   history: { role: 'user' | 'bot', content: string, timestamp: string }[];
 }
@@ -42,6 +43,9 @@ function App() {
   const [broadcastMsg, setBroadcastMsg] = useState('');
   const [broadcastPhones, setBroadcastPhones] = useState('');
   
+  // Chat Reply State
+  const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+
   const [campName, setCampName] = useState('');
   const [campMsg, setCampMsg] = useState('');
   const [campDate, setCampDate] = useState('');
@@ -179,6 +183,37 @@ function App() {
     }
   };
 
+  const handleSendMessage = async (phone: string) => {
+    const message = replyText[phone];
+    if (!message?.trim()) return;
+
+    try {
+        await fetchWithAuth(`${API_URL}/messages/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, message })
+        });
+        setReplyText(prev => ({ ...prev, [phone]: '' }));
+        fetchSessions(); // Refresh chat
+    } catch (err) {
+        alert('Erro ao enviar mensagem');
+    }
+  };
+
+  const handleTogglePause = async (phone: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'PAUSED' ? 'active' : 'paused';
+    try {
+        await fetchWithAuth(`${API_URL}/sessions/${phone}/status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        });
+        fetchSessions();
+    } catch (err) {
+        alert('Erro ao alterar status do atendimento');
+    }
+  };
+
   if (!token) {
     return <Login onLogin={handleLogin} />;
   }
@@ -245,10 +280,25 @@ function App() {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
               {sessions.map(session => (
-                <div key={session.phone} style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', borderLeft: '4px solid #3498db' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                    <h3 style={{ margin: 0 }}>{session.phone}</h3>
-                    <span style={{ background: '#ecf0f1', padding: '2px 8px', borderRadius: '12px', fontSize: '12px' }}>{session.step}</span>
+                <div key={session.phone} style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', borderLeft: `4px solid ${session.status === 'PAUSED' ? '#e74c3c' : '#3498db'}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', alignItems: 'center' }}>
+                    <div>
+                        <h3 style={{ margin: 0 }}>{session.phone}</h3>
+                        {session.status === 'PAUSED' && <span style={{fontSize: '10px', color: '#e74c3c', fontWeight: 'bold'}}>🔴 PAUSADO (HUMANO)</span>}
+                    </div>
+                    <div style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
+                        <span style={{ background: '#ecf0f1', padding: '2px 8px', borderRadius: '12px', fontSize: '12px' }}>{session.step}</span>
+                        <button 
+                            onClick={() => handleTogglePause(session.phone, session.status || 'active')}
+                            title={session.status === 'PAUSED' ? 'Retomar Bot' : 'Pausar Bot e Assumir'}
+                            style={{ 
+                                background: session.status === 'PAUSED' ? '#2ecc71' : '#e74c3c', 
+                                color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', padding: '4px 8px', fontWeight: 'bold'
+                            }}
+                        >
+                            {session.status === 'PAUSED' ? '▶' : '⏸'}
+                        </button>
+                    </div>
                   </div>
                   
                   <div style={{ marginBottom: '15px' }}>
@@ -259,21 +309,42 @@ function App() {
                     ))}
                   </div>
 
-                  <div style={{ background: '#f8f9fa', padding: '10px', borderRadius: '8px', height: '150px', overflowY: 'auto', marginBottom: '15px', fontSize: '13px' }}>
+                  <div style={{ background: '#f8f9fa', padding: '10px', borderRadius: '8px', height: '200px', overflowY: 'auto', marginBottom: '15px', fontSize: '13px', display: 'flex', flexDirection: 'column-reverse' }}>
                     {session.history.slice().reverse().map((msg, idx) => (
                       <div key={idx} style={{ marginBottom: '8px', textAlign: msg.role === 'user' ? 'left' : 'right' }}>
                         <span style={{ 
                           display: 'inline-block', 
                           padding: '6px 10px', 
                           borderRadius: '8px', 
-                          background: msg.role === 'user' ? '#e17055' : '#0984e3', 
-                          color: 'white',
-                          maxWidth: '80%'
+                          background: msg.role === 'user' ? '#fff' : (msg.role === 'bot' ? '#e1f5fe' : '#d1f2eb'), // Different color for human agent?
+                          border: msg.role === 'user' ? '1px solid #dfe6e9' : 'none',
+                          color: '#2d3436',
+                          maxWidth: '85%',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                         }}>
                           {msg.content}
                         </span>
+                        <div style={{ fontSize: '9px', color: '#b2bec3', marginTop: '2px' }}>
+                            {msg.role === 'bot' ? '🤖 Bot' : (msg.role === 'user' ? '👤 Cliente' : '👨‍💻 Agente')} • {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </div>
                       </div>
                     ))}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+                    <input 
+                        value={replyText[session.phone] || ''}
+                        onChange={e => setReplyText(prev => ({...prev, [session.phone]: e.target.value}))}
+                        placeholder="Digite sua resposta..."
+                        style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #dfe6e9', outline: 'none' }}
+                        onKeyDown={e => { if(e.key === 'Enter') handleSendMessage(session.phone) }}
+                    />
+                    <button 
+                        onClick={() => handleSendMessage(session.phone)}
+                        style={{ background: '#3498db', color: 'white', border: 'none', borderRadius: '6px', padding: '0 15px', cursor: 'pointer', fontSize: '16px' }}
+                    >
+                        ➤
+                    </button>
                   </div>
                 </div>
               ))}
