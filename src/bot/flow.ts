@@ -19,6 +19,16 @@ export const botFlow = {
           senderName
       });
 
+      // 0. Super Admin / Reset Command (Always allowed)
+      if (message.trim().toLowerCase() === '#bot' || message.trim().toLowerCase() === '#reset') {
+          console.log(`[Flow] Force resetting session for ${phone}`);
+          sessionManager.updateState(phone, 'IDLE');
+          // Sync with DB to ensure it persists
+          await databaseService.saveSession(phone, { status: 'active' });
+          await whatsappService.sendText(phone, '🤖 Bot reativado! Estou de volta.', 'assistant', 'Bot Lopes');
+          return;
+      }
+
       // 1. Check Session State
       let session = await sessionManager.ensureSession(phone, senderName);
 

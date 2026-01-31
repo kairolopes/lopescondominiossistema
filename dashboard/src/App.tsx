@@ -268,7 +268,12 @@ function App() {
                 <div>
                 <header className="flex justify-between items-center" style={{ marginBottom: '32px' }}>
                     <div>
-                        <h1>Atendimentos</h1>
+                        <div className="flex items-center gap-3">
+                            <h1>Atendimentos</h1>
+                            <span style={{ fontSize: '12px', background: '#e3f2fd', color: '#1565c0', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bbdefb' }}>
+                                ⚡ Antigravity System
+                            </span>
+                        </div>
                         {lastUpdated && <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Atualizado às {lastUpdated.toLocaleTimeString()}</span>}
                     </div>
                     <span className="tag" style={{ fontSize: '13px', padding: '6px 10px' }}>{sessions.length} ativos</span>
@@ -340,7 +345,7 @@ function App() {
                                 {msg.content}
                                 </div>
                                 <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                    {msg.role === 'bot' ? 'Bot' : (msg.role === 'user' ? 'Cliente' : 'Agente')} • {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                    {msg.role === 'bot' ? '🤖 Antigravity Bot' : (msg.role === 'user' ? 'Cliente' : (msg.senderName || 'Agente'))} • {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                 </div>
                             </div>
                             ))}

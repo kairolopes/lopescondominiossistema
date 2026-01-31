@@ -106,7 +106,8 @@ export const adminController = {
                     return {
                         role: role,
                         content: msgData.content,
-                        timestamp: msgData.timestamp && msgData.timestamp.toDate ? msgData.timestamp.toDate().toISOString() : new Date().toISOString()
+                        timestamp: msgData.timestamp && msgData.timestamp.toDate ? msgData.timestamp.toDate().toISOString() : new Date().toISOString(),
+                        senderName: msgData.senderName
                     };
                 }).reverse(); // Frontend expects chronological order usually, but let's check. 
                 // Actually App.tsx just renders them. If we want chat style (oldest top), we should reverse if fetched desc.
