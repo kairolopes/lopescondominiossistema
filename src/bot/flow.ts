@@ -20,10 +20,7 @@ export const botFlow = {
       });
 
       // 1. Check Session State
-      let session = sessionManager.getSession(phone);
-      if (!session) {
-        session = sessionManager.createSession(phone, senderName);
-      }
+      let session = await sessionManager.ensureSession(phone, senderName);
 
       // If session is PAUSED (Human Intervention), do not process
       if (session.state === 'PAUSED') {

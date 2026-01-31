@@ -10,7 +10,12 @@ let serviceAccount: any;
 try {
     // Priority 1: Environment Variable (Base64 or JSON string) - Best for Render
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        try {
+            serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+            console.log('[FirebaseConfig] Successfully parsed FIREBASE_SERVICE_ACCOUNT from env.');
+        } catch (parseError) {
+            console.error('[FirebaseConfig] Failed to parse FIREBASE_SERVICE_ACCOUNT env var. Is it a valid JSON string?', parseError);
+        }
     } 
     // Priority 2: Local File
     else {
