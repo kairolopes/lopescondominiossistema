@@ -7,7 +7,7 @@ interface Session {
   step: string;
   status?: string; // 'active' | 'paused'
   tags: string[];
-  history: { role: 'user' | 'bot', content: string, timestamp: string }[];
+  history: { role: 'user' | 'bot' | 'agent', content: string, timestamp: string }[];
   assigneeId?: string;
 }
 
@@ -194,7 +194,11 @@ function App() {
         await fetchWithAuth(`${API_URL}/messages/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, message })
+            body: JSON.stringify({ 
+              phone, 
+              message,
+              senderName: user?.name || 'Agente'
+            })
         });
         setReplyText(prev => ({ ...prev, [phone]: '' }));
         fetchSessions(); // Refresh chat

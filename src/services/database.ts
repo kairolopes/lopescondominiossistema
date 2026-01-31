@@ -5,7 +5,7 @@ export interface Message {
     id?: string;
     phone: string;
     content: string;
-    role: 'user' | 'assistant';
+    role: 'user' | 'assistant' | 'agent';
     timestamp: Date;
     senderName?: string;
 }

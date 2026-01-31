@@ -7,11 +7,11 @@ import { sessionManager } from '../services/sessionManager';
 export const adminController = {
     async sendMessage(req: Request, res: Response) {
         try {
-            const { phone, message } = req.body;
+            const { phone, message, senderName } = req.body;
             if (!phone || !message) return res.status(400).json({ error: 'Missing phone or message' });
 
             // Send via Z-API
-            await zapiService.sendText(phone, message);
+            await zapiService.sendText(phone, message, 'agent', senderName);
             
             res.json({ success: true });
         } catch (error) {
@@ -81,37 +81,43 @@ export const adminController = {
     async getSessions(req: Request, res: Response) {
         try {
             if (!db) return res.status(503).json({ error: 'Database not initialized' });
+            const firestore = db;
 
-            const snapshot = await db.collection('conversations').orderBy('lastActivity', 'desc').limit(20).get();
+            const snapshot = await firestore.collection('conversations').orderBy('lastActivity', 'desc').limit(20).get();
             
             const sessions = await Promise.all(snapshot.docs.map(async (doc) => {
                 const data = doc.data();
-                const phone = data.phone;
+                const phone = doc.id; // Use doc.id as the most reliable phone source
 
                 // Fetch recent messages for history
-                const messagesSnapshot = await db!.collection('conversations')
+                const messagesSnapshot = await firestore.collection('conversations')
                     .doc(phone)
                     .collection('messages')
                     .orderBy('timestamp', 'desc')
-                    .limit(10)
+                    .limit(20) // Increased limit for better context
                     .get();
 
                 const history = messagesSnapshot.docs.map(msgDoc => {
                     const msgData = msgDoc.data();
+                    let role = 'user';
+                    if (msgData.role === 'assistant') role = 'bot';
+                    else if (msgData.role === 'agent') role = 'agent';
+                    
                     return {
-                        role: msgData.role === 'assistant' ? 'bot' : 'user',
+                        role: role,
                         content: msgData.content,
                         timestamp: msgData.timestamp && msgData.timestamp.toDate ? msgData.timestamp.toDate().toISOString() : new Date().toISOString()
                     };
-                }); 
+                }).reverse(); // Frontend expects chronological order usually, but let's check. 
+                // Actually App.tsx just renders them. If we want chat style (oldest top), we should reverse if fetched desc.
                 
                 return {
-                    phone: data.phone,
-                    step: 'active', // Default or fetch from session
-                    tags: ['whatsapp'], // Default
+                    phone: phone,
+                    step: 'active', 
+                    tags: ['whatsapp'], 
                     status: data.status || 'active',
                     assigneeId: data.assigneeId || null,
-                    history: history // ordered desc
+                    history: history // ordered asc (oldest first) after reverse
                 };
             }));
 
