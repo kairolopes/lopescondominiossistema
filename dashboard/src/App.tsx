@@ -84,10 +84,17 @@ function App() {
     if (!token) return;
     try {
       const res = await fetchWithAuth(`${API_URL}/sessions`);
+      if (!res.ok) {
+        if (res.status === 503) throw new Error('Banco de dados desconectado (Verifique FIREBASE_SERVICE_ACCOUNT no Render)');
+        throw new Error(`Erro ${res.status}: ${res.statusText}`);
+      }
       const data = await res.json();
       setSessions(data);
-    } catch (err) {
+      setConnectionError(null);
+      setLastUpdated(new Date());
+    } catch (err: any) {
       console.error('Error fetching sessions', err);
+      setConnectionError(err.message || 'Erro de conexão com o servidor');
     }
   };
 
