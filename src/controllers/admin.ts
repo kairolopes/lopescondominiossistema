@@ -1,8 +1,52 @@
 import express, { Request, Response } from 'express';
 import { campaignService } from '../services/campaign';
 import { db } from '../config/firebase';
+import { zapiService } from '../services/zapi';
+import { sessionManager } from '../services/sessionManager';
 
 export const adminController = {
+    async sendMessage(req: Request, res: Response) {
+        try {
+            const { phone, message } = req.body;
+            if (!phone || !message) return res.status(400).json({ error: 'Missing phone or message' });
+
+            // Send via Z-API
+            await zapiService.sendText(phone, message);
+            
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Error sending message:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
+    async updateSessionStatus(req: Request, res: Response) {
+        try {
+            const { phone } = req.params;
+            const { status } = req.body; // 'active' | 'paused'
+            
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
+
+            // Update Firestore
+            await db.collection('conversations').doc(phone).set({ 
+                status: status,
+                lastActivity: new Date()
+            }, { merge: true });
+
+            // Update In-Memory Session Manager
+            if (status === 'paused') {
+                sessionManager.updateState(phone, 'PAUSED');
+            } else {
+                sessionManager.updateState(phone, 'IDLE');
+            }
+
+            res.json({ success: true, status });
+        } catch (error) {
+            console.error('Error updating session:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
     async getConversations(req: Request, res: Response) {
         try {
             if (!db) return res.status(503).json({ error: 'Database not initialized' });
@@ -47,6 +91,7 @@ export const adminController = {
                     phone: data.phone,
                     step: 'active', // Default or fetch from session
                     tags: ['whatsapp'], // Default
+                    status: data.status || 'active',
                     history: history // ordered desc
                 };
             }));
