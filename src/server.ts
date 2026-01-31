@@ -3,6 +3,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { config } from './config/env';
+import { db } from './config/firebase';
 import webhookRoutes from './controllers/webhook';
 import adminRoutes from './controllers/admin';
 import authRoutes, { authenticateJWT } from './controllers/auth';
