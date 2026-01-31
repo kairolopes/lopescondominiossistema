@@ -16,6 +16,48 @@ export const adminController = {
         }
     },
 
+    async getSessions(req: Request, res: Response) {
+        try {
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
+
+            const snapshot = await db.collection('conversations').orderBy('lastActivity', 'desc').limit(20).get();
+            
+            const sessions = await Promise.all(snapshot.docs.map(async (doc) => {
+                const data = doc.data();
+                const phone = data.phone;
+
+                // Fetch recent messages for history
+                const messagesSnapshot = await db.collection('conversations')
+                    .doc(phone)
+                    .collection('messages')
+                    .orderBy('timestamp', 'desc')
+                    .limit(10)
+                    .get();
+
+                const history = messagesSnapshot.docs.map(msgDoc => {
+                    const msgData = msgDoc.data();
+                    return {
+                        role: msgData.role === 'assistant' ? 'bot' : 'user',
+                        content: msgData.content,
+                        timestamp: msgData.timestamp && msgData.timestamp.toDate ? msgData.timestamp.toDate().toISOString() : new Date().toISOString()
+                    };
+                }); 
+                
+                return {
+                    phone: data.phone,
+                    step: 'active', // Default or fetch from session
+                    tags: ['whatsapp'], // Default
+                    history: history // ordered desc
+                };
+            }));
+
+            res.json(sessions);
+        } catch (error) {
+            console.error('Error fetching sessions:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
     async getMessages(req: Request, res: Response) {
         try {
             if (!db) return res.status(503).json({ error: 'Database not initialized' });
