@@ -6,7 +6,9 @@ const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
 export const aiService = {
   generateResponse: async (prompt: string): Promise<string> => {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      // Using gemini-1.5-flash-001 which is the specific stable version (and cheapest)
+      // If this fails, consider gemini-2.5-flash-lite if available in your region
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-001' });
       
       const systemContext = `
         Você é um assistente virtual da Lopes Condomínios.
