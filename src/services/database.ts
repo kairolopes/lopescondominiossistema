@@ -30,6 +30,8 @@ export const databaseService = {
                 senderName: safeSenderName
             };
 
+            console.log('[Database] Saving message to Firestore:', JSON.stringify(msgData));
+
             // Save to 'conversations/{phone}/messages'
             await db.collection('conversations')
                 .doc(message.phone)
