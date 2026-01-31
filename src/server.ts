@@ -19,13 +19,32 @@ app.use('/api/auth', authRoutes);
 app.use('/api', webhookRoutes);
 
 // Health Check Endpoint
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        database: db ? 'connected' : 'disconnected',
-        timestamp: new Date(),
-        version: '1.0.1'
-    });
+app.get('/api/health', async (req, res) => {
+    try {
+        const status = {
+            server: 'online',
+            timestamp: new Date().toISOString(),
+            firebase: 'unknown'
+        };
+
+        if (db) {
+            try {
+                // Try to read a dummy doc to check connection
+                await db.collection('health_check').doc('ping').set({ last_check: new Date() });
+                status.firebase = 'connected';
+                res.json(status);
+            } catch (dbError: any) {
+                console.error('Health Check - Firebase Error:', dbError);
+                status.firebase = 'error';
+                res.status(503).json({ ...status, error: dbError.message });
+            }
+        } else {
+            status.firebase = 'not_initialized';
+            res.status(503).json(status);
+        }
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: 'Internal Server Error' });
+    }
 });
 
 // Protect Admin Routes with Authentication
