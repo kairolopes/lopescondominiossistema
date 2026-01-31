@@ -1,0 +1,19 @@
+services:
+  # Unified Service (Node.js + React Dashboard)
+  - type: web
+    name: lopes-bot
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: NODE_ENV=production npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ZAPI_INSTANCE_ID
+        sync: false
+      - key: ZAPI_TOKEN
+        sync: false
+      - key: ZAPI_CLIENT_TOKEN
+        sync: false
