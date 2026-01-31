@@ -24,7 +24,7 @@ export const config = {
     apiKey: process.env.OPENAI_API_KEY || '',
   },
   gemini: {
-    // Deprecated in favor of OpenAI
-    apiKey: process.env.GEMINI_API_KEY || '',
+    // Primary AI (Antigravity/Google)
+    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '',
   }
 };
