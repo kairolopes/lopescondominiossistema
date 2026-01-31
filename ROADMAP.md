@@ -1,40 +1,45 @@
-# Roadmap de Desenvolvimento - Lopes Condomínios CRM (Premium)
+# Roadmap: Lopes Condomínios - A Mega Plataforma Conversacional & CRM
 
-Baseado na proposta "HelenaCRM White Label Premium", este roadmap define as etapas para transformar o sistema atual em uma plataforma completa de CRM Conversacional e Atendimento Omnichannel.
+Este roadmap foi expandido para criar uma plataforma de gestão completa, superior ao Notion, focada em resolver as dificuldades de gerenciamento de equipe e oferecer "todas as possibilidades" de um CRM moderno.
 
-## 🚀 Fase 1: Fundação & Estabilidade (Atual)
-- [x] **Bot de WhatsApp (Z-API)**: Respostas automáticas, integração com Superlógica.
-- [x] **Painel Administrativo (Dashboard)**: Visualização básica de atendimentos.
-- [x] **Banco de Dados (Firebase)**: Persistência de conversas e sessões.
-- [ ] **Correção de Infraestrutura**: Habilitação da API Firestore e estabilização do deploy no Render.
-- [ ] **Monitoramento**: Logs de erro detalhados e Health Check (/api/health).
+## 🚀 Fase 1: Fundação Sólida (Concluído/Em Estabilização)
+- [x] **Bot de WhatsApp (Z-API)**: Integração base funcionando.
+- [x] **Banco de Dados (Firebase)**: Persistência de mensagens.
+- [x] **Dashboard Inicial**: Visualização de chats (Em correção).
+- [ ] **Estabilidade**: Monitoramento de erros e Health Check.
 
-## 💼 Fase 2: CRM Conversacional (Próximo Passo)
-Transformar o chat em uma ferramenta de vendas e gestão.
-- [ ] **Kanban de Atendimentos**: Visualização de leads por colunas (Ex: Novo, Em Atendimento, Aguardando Pagamento, Fechado).
-- [ ] **Gestão de Oportunidades**: Criar/Editar "Deals" associados ao contato.
-- [ ] **Etiquetas (Tags) Inteligentes**: Segmentação automática (Ex: "Inadimplente", "Síndico", "Morador").
-- [ ] **Histórico Unificado**: Timeline completa de interações (Bot + Humano).
+## 👥 Fase 2: Gestão de Equipe & Controle (Prioridade Máxima - "Melhor que Notion")
+*Foco: Resolver a dificuldade de gerenciamento de funcionários.*
+- [ ] **Gestão de Usuários e Permissões**: Níveis de acesso (Admin, Supervisor, Atendente).
+- [ ] **Filas de Atendimento**: Distribuição automática de chats por departamento (Financeiro, Manutenção, Portaria).
+- [ ] **Métricas de Desempenho**: Relatórios de tempo de resposta, resolução e volume por atendente.
+- [ ] **Notas Internas & Menções**: Chat interno na conversa (invisível ao cliente) para equipe colaborar (`@funcionario`).
+- [ ] **Audit Log**: Registro de todas as ações dos funcionários no sistema.
 
-## 📢 Fase 3: Motor de Campanhas & Broadcast
-Ferramentas para comunicação em massa ativa.
-- [ ] **Disparo em Massa**: Interface visual para enviar mensagens para listas de contatos (já existe lógica no backend).
-- [ ] **Agendamento**: Programar envios para datas futuras.
-- [ ] **Segmentação**: Enviar apenas para tags específicas (Ex: "Avisar todos os Síndicos").
-- [ ] **Relatórios de Entrega**: Taxa de abertura e respostas das campanhas.
+## 📊 Fase 3: CRM Conversacional & Kanban (O Coração do Sistema)
+*Foco: Organização visual e fluxo de trabalho.*
+- [ ] **Pipeline de Atendimentos (Kanban)**: Colunas personalizáveis (Triagem -> Em Análise -> Aguardando Terceiro -> Concluído).
+- [ ] **Cards Inteligentes**: O chat vira um "Card" com valor, prioridade e data limite.
+- [ ] **Gestão de Tarefas**: Criar tarefas vinculadas a conversas para funcionários (com prazo e lembrete).
+- [ ] **Perfil 360 do Condômino**: Histórico completo (chamados, boletos, reservas) ao lado do chat.
 
-## 🤖 Fase 4: Inteligência Artificial & Automação Avançada
-Elevar o nível do atendimento automático.
-- [ ] **Múltiplos Agentes de IA**: Especialistas por departamento (Financeiro, Suporte, Vendas).
-- [ ] **Transbordo Inteligente**: Detectar frustração e transferir para humano automaticamente.
-- [ ] **Respostas Sugeridas**: IA sugere respostas para o atendente humano no Dashboard.
-- [ ] **Integrações (Webhooks)**: Conexão fácil com n8n/Make para automações externas.
+## 🤖 Fase 4: Inteligência Artificial Suprema
+- [ ] **Copiloto para Atendentes**: IA sugere respostas baseadas no histórico e documentos do condomínio.
+- [ ] **Resumo Automático**: IA resume conversas longas para o gestor entender o problema rápido.
+- [ ] **Análise de Sentimento**: Detectar clientes irritados e alertar supervisores em tempo real.
+- [ ] **Treinamento de Equipe**: IA avalia a qualidade das respostas dos atendentes.
 
-## 📱 Fase 5: Omnichannel & Mobile
-Expandir canais e acesso.
-- [ ] **Instagram Direct & Messenger**: Centralizar todas as redes sociais no mesmo Inbox.
-- [ ] **App Mobile (PWA/Nativo)**: Versão instalável do Dashboard para celular.
-- [ ] **White Label**: Personalização completa de cores, logo e domínio (já iniciado).
+## 📢 Fase 5: Motor de Campanhas & Automação (Marketing & Cobrança)
+- [ ] **Régua de Cobrança Automática**: Envio de boletos e lembretes sem intervenção humana.
+- [ ] **Broadcast Segmentado**: Avisos para blocos específicos ou perfis (ex: "Proprietários").
+- [ ] **Automação No-Code**: Construtor de fluxos (estilo n8n) dentro da plataforma.
 
-## 🎯 Objetivo Final
-Uma plataforma robusta que não apenas responde dúvidas, mas gerencia o relacionamento com o condômino, recupera crédito (cobrança ativa) e automatiza processos repetitivos, tudo centralizado e com a marca Lopes Condomínios.
+## 📱 Fase 6: Omnichannel & Expansão
+- [ ] **Central Unificada**: WhatsApp, E-mail, Instagram e App do Condomínio em uma única tela.
+- [ ] **App Mobile para Equipe**: Gestão na palma da mão.
+
+---
+**Próximos Passos Imediatos:**
+1. Criar estrutura de dados para **Tickets/Atendimentos** (Kanban).
+2. Implementar sistema de **Login de Funcionários** com níveis de acesso.
+3. Desenvolver visualização **Kanban** no Dashboard.

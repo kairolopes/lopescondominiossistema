@@ -6,6 +6,7 @@ import { config } from './config/env';
 import { db } from './config/firebase';
 import webhookRoutes from './controllers/webhook';
 import adminRoutes from './controllers/admin';
+import ticketRoutes from './controllers/tickets';
 import authRoutes, { authenticateJWT } from './controllers/auth';
 import { campaignService } from './services/campaign';
 
@@ -51,6 +52,7 @@ app.get('/api/health', async (req, res) => {
 // @ts-ignore
 // app.use('/api/admin', authenticateJWT, adminRoutes);
 app.use('/api/admin', adminRoutes); // Temporary: Disable auth for dashboard testing
+app.use('/api/tickets', ticketRoutes);
 
 // Serve Static Files (Dashboard)
 app.use(express.static(path.join(__dirname, '../dashboard/dist')));

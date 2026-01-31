@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Login } from './Login';
+import { KanbanBoard } from './components/KanbanBoard';
 
 interface Session {
   phone: string;
@@ -32,7 +33,7 @@ function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [user, setUser] = useState<User | null>(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null);
 
-  const [activeTab, setActiveTab] = useState<'sessions' | 'campaigns' | 'broadcast' | 'users'>('sessions');
+  const [activeTab, setActiveTab] = useState<'sessions' | 'kanban' | 'campaigns' | 'broadcast' | 'users'>('sessions');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [usersList, setUsersList] = useState<User[]>([]);
@@ -200,6 +201,12 @@ function App() {
             💬 Atendimentos
           </button>
           <button 
+            onClick={() => setActiveTab('kanban')}
+            style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: activeTab === 'kanban' ? '#e17055' : '#ecf0f1', color: activeTab === 'kanban' ? 'white' : '#2c3e50', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            📊 Kanban
+          </button>
+          <button 
             onClick={() => setActiveTab('campaigns')}
             style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: activeTab === 'campaigns' ? '#e67e22' : '#ecf0f1', color: activeTab === 'campaigns' ? 'white' : '#2c3e50', cursor: 'pointer', fontWeight: 'bold' }}
           >
@@ -272,6 +279,13 @@ function App() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* KANBAN TAB */}
+      {activeTab === 'kanban' && (
+        <div style={{ height: 'calc(100vh - 150px)' }}>
+          <KanbanBoard token={token || ''} baseUrl={BASE_URL} />
         </div>
       )}
 
