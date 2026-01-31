@@ -9,6 +9,12 @@ export const config = {
     token: process.env.ZAPI_TOKEN || '',
     securityToken: process.env.ZAPI_SECURITY_TOKEN || '',
   },
+  whatsapp: {
+    apiUrl: process.env.WHATSAPP_API_URL || 'https://graph.facebook.com/v21.0',
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN || '',
+    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+    verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || 'lopes_secret_token',
+  },
   superlogica: {
     appToken: process.env.SUPERLOGICA_APP_TOKEN || '',
     accessToken: process.env.SUPERLOGICA_ACCESS_TOKEN || '',

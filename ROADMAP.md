@@ -1,54 +1,53 @@
-# Roadmap - Lopes Condomínios (Mega Plataforma)
+# Roadmap do Produto - Lopes Condomínios CRM
 
-Este roadmap define a evolução da plataforma conversacional para se tornar um CRM completo de gestão condominial, superando ferramentas genéricas como Notion e incorporando funcionalidades de alto nível baseadas na proposta comercial.
+Este documento descreve o plano de desenvolvimento para transformar o sistema atual em uma plataforma de gestão de condomínios de alto nível, com integração robusta via Antigravity e interface estilo Notion.
 
-## ✅ Fase 1: Fundação & Conversação (Concluído)
-- [x] **Bot Inteligente (IA)**: Integração com Gemini para respostas naturais.
-- [x] **Canais Oficiais**: Conexão estável com WhatsApp via Z-API.
-- [x] **Integração Superlógica**: Consulta de boletos e segunda via por CPF.
-- [x] **Painel Administrativo Básico**: Visualização de atendimentos em tempo real.
+## 🚀 Fase 1: Fundação & Estabilidade (Atual)
+Foco: Garantir que o básico funcione perfeitamente. Mensagens chegam, saem e são registradas.
 
-## ✅ Fase 2: Gestão Visual & Intervenção Humana (Concluído)
-- [x] **Modo Híbrido (Humano + Bot)**: 
-  - Botão "Assumir Atendimento" (Pausa o robô instantaneamente).
-  - Envio de mensagens manuais direto pelo Dashboard.
-- [x] **Gestão Visual (Kanban)**:
-  - Quadro estilo Trello/Notion para organizar chamados.
-  - Colunas: Triagem, Em Atendimento, Pendente, Resolvido.
-- [x] **Tickets & Chamados**:
-  - Criação de tickets internos (ex: "Vazamento Bloco B").
-  - Definição de prioridades (Baixa, Média, Alta, Urgente).
-- [x] **Atribuição de Responsáveis**:
-  - Designação de membros da equipe para atendimentos específicos.
+- [x] **Arquitetura Híbrida**: Backend Node.js com Webhook para Antigravity (Meta Cloud API).
+- [x] **Integração Webhook**: Recebimento de mensagens em tempo real (Webhook verificado).
+- [x] **Envio de Mensagens**: Migração do Z-API para Antigravity/Meta API (Service Layer).
+- [x] **Dashboard Estilo Notion**: Interface limpa, minimalista e funcional.
+- [x] **Identificação de Agente**: Saber quem enviou a mensagem (Sender ID).
+- [ ] **Validação em Produção**: Teste de envio e recebimento com credenciais reais.
 
-## 🌟 Fase 3: Omnichannel & CRM Conversacional Avançado (Próximos Passos)
-Baseado nos requisitos do "Helena CRM":
-- [ ] **Omnichannel Real**:
-  - Integração com Instagram Direct e Facebook Messenger.
-  - Centralização de todas as conversas em uma única caixa de entrada.
-- [ ] **CRM Conversacional**:
-  - Rastreabilidade de leads (origem do contato).
-  - Etiquetas e segmentação avançada de contatos.
-  - Histórico unificado de interações multicanal.
-- [ ] **Automação & Integrações (Make/N8N)**:
-  - Webhooks para eventos de chat (início, fim, transferência).
-  - Conectores para automação de processos complexos sem código.
+## 🛠️ Fase 2: Gestão & Produtividade (Curto Prazo)
+Foco: Melhorar a vida de quem atende.
 
-## 🚀 Fase 4: Marketing & Cobrança Ativa
-- [ ] **Campanhas e Disparos**:
-  - Agendamento de disparos em massa (Broadcast).
-  - Segmentação por tags (ex: "Inadimplentes", "Bloco A").
-  - Relatórios de entrega e leitura.
-- [ ] **Cobrança Inteligente**:
-  - Régua de cobrança automatizada via WhatsApp.
-  - Negociação assistida por IA.
+- [ ] **Transferência Inteligente**:
+    - Transferir conversa para outro agente com nota interna.
+    - Histórico preservado na transferência.
+- [ ] **Kanban Avançado**:
+    - Drag & drop de cards (Chamados).
+    - Automação: Mover para "Em Atendimento" quando responder.
+    - Tags personalizáveis (Urgente, Financeiro, Manutenção).
+- [ ] **Respostas Rápidas (Snippets)**:
+    - Comandos "/" para inserir textos padrões (ex: "/pix", "/endereco").
 
-## 🔮 Fase 5: Inteligência & Gestão 360º
-- [ ] **Base de Conhecimento RAG (Retrieval-Augmented Generation)**:
-  - Upload de Regimento Interno e Atas para respostas precisas da IA.
-- [ ] **Business Intelligence (BI)**:
-  - Dashboards de performance da equipe.
-  - Análise de sentimentos das conversas.
+## 🤖 Fase 3: Automação & IA (Médio Prazo)
+Foco: Reduzir trabalho manual e responder 24/7.
+
+- [ ] **IA Contextual (RAG)**:
+    - Alimentar a IA com Regimento Interno e Atas do condomínio.
+    - Respostas precisas sobre regras específicas (ex: "pode cachorro na piscina?").
+- [ ] **Integração Superlógica Profunda**:
+    - 2ª via de boleto automática sem intervenção humana (já iniciado).
+    - Consulta de nada consta.
+    - Reserva de áreas comuns via Chat.
+
+## 💎 Fase 4: Premium & White Label (Longo Prazo - Visão HelenaCRM)
+Foco: Escalar e profissionalizar.
+
+- [ ] **App Mobile Nativo**: Versão iOS/Android para síndicos e porteiros.
+- [ ] **Múltiplos Canais**: Centralizar WhatsApp, Instagram e E-mail no mesmo Inbox.
+- [ ] **Analytics**: Relatórios de tempo de resposta, satisfação e volume de atendimentos.
+- [ ] **Personalização Total**: Logo e cores do condomínio na área do cliente.
 
 ---
-**Status Atual**: Entrando na Fase 3. Foco em expandir canais e aprofundar as capacidades de CRM.
+
+## 📋 Próximos Passos Imediatos (To-Do)
+
+1. **Deploy**: Enviar código atualizado para o Render.
+2. **Configuração**: Adicionar `WHATSAPP_ACCESS_TOKEN` e `PHONE_NUMBER_ID` no Render.
+3. **Teste**: Validar fluxo completo de mensagens.

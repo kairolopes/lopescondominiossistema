@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { campaignService } from '../services/campaign';
 import { db } from '../config/firebase';
-import { zapiService } from '../services/zapi';
+import { whatsappService } from '../services/whatsapp';
 import { sessionManager } from '../services/sessionManager';
 
 export const adminController = {
@@ -10,8 +10,8 @@ export const adminController = {
             const { phone, message, senderName } = req.body;
             if (!phone || !message) return res.status(400).json({ error: 'Missing phone or message' });
 
-            // Send via Z-API
-            await zapiService.sendText(phone, message, 'agent', senderName);
+            // Send via WhatsApp (Official API/Antigravity)
+            await whatsappService.sendText(phone, message, 'agent', senderName);
             
             res.json({ success: true });
         } catch (error) {
