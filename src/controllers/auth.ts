@@ -9,7 +9,7 @@ export const authController = {
         const { username, password } = req.body; // username here is email
 
         // Hardcoded admin fallback
-        if (username === 'admin' && password === 'lopes2024') {
+        if ((username === 'admin' || username === 'admin@lopes.com.br') && password === '123456') {
             const token = jwt.sign({ username: 'admin', role: 'admin', name: 'Master Admin' }, SECRET_KEY, { expiresIn: '24h' });
             return res.json({ 
                 token, 
