@@ -6,10 +6,11 @@ const SECRET_KEY = process.env.JWT_SECRET || 'lopes_secret_key_123';
 
 export const authController = {
     async login(req: Request, res: Response) {
-        const { username, password } = req.body; // username here is email
+        const { username, email, password } = req.body;
+        const loginId = username || email;
 
         // Hardcoded admin fallback
-        if ((username === 'admin' || username === 'admin@lopes.com.br') && password === '123456') {
+        if ((loginId === 'admin' || loginId === 'admin@lopes.com.br') && password === '123456') {
             const token = jwt.sign({ username: 'admin', role: 'admin', name: 'Master Admin' }, SECRET_KEY, { expiresIn: '24h' });
             return res.json({ 
                 token, 
@@ -18,7 +19,7 @@ export const authController = {
         }
 
         try {
-            const user = await userService.findSystemUserByEmail(username);
+            const user = await userService.findSystemUserByEmail(loginId);
             if (user && user.password === password) { // TODO: Use bcrypt
                  const token = jwt.sign({ 
                      id: user.id, 
