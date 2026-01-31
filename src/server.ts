@@ -16,6 +16,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api', webhookRoutes);
+
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        database: db ? 'connected' : 'disconnected',
+        timestamp: new Date(),
+        version: '1.0.1'
+    });
+});
+
 // Protect Admin Routes with Authentication
 // @ts-ignore
 // app.use('/api/admin', authenticateJWT, adminRoutes);

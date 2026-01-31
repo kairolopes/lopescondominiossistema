@@ -1,4 +1,5 @@
 import { db } from '../config/firebase';
+import * as admin from 'firebase-admin';
 
 export interface Message {
     id?: string;
@@ -11,7 +12,10 @@ export interface Message {
 
 export const databaseService = {
     saveMessage: async (message: Message) => {
-        if (!db) return; // Fail silently or throw error depending on needs
+        if (!db) {
+            console.error('[Database] Failed to save message: Database not initialized (Missing credentials?)');
+            return;
+        }
 
         try {
             // Save to 'conversations/{phone}/messages'
@@ -37,16 +41,19 @@ export const databaseService = {
     },
 
     getSession: async (phone: string) => {
-        if (!db) return null;
+        if (!db) {
+            console.error('[Database] Failed to get session: Database not initialized');
+            return null;
+        }
         const doc = await db.collection('sessions').doc(phone).get();
         return doc.exists ? doc.data() : null;
     },
 
     saveSession: async (phone: string, data: any) => {
-        if (!db) return;
+        if (!db) {
+            console.error('[Database] Failed to save session: Database not initialized');
+            return;
+        }
         await db.collection('sessions').doc(phone).set(data, { merge: true });
     }
 };
-
-// Helper for timestamp import if needed in other files
-import * as admin from 'firebase-admin';
