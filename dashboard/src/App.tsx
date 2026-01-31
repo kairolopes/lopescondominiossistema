@@ -8,7 +8,7 @@ interface Session {
   step: string;
   status?: string; // 'active' | 'paused'
   tags: string[];
-  history: { role: 'user' | 'bot' | 'agent', content: string, timestamp: string }[];
+  history: { role: 'user' | 'bot' | 'agent', content: string, timestamp: string, senderName?: string }[];
   assigneeId?: string;
 }
 
