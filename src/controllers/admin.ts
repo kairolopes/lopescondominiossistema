@@ -74,6 +74,7 @@ export default (router: any) => {
     
     // Chat endpoints
     r.get('/conversations', adminController.getConversations);
+    r.get('/sessions', adminController.getSessions); // Added for frontend compatibility
     r.get('/conversations/:phone/messages', adminController.getMessages);
     
     // Campaign endpoints
