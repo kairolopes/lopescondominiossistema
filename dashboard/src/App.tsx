@@ -308,11 +308,24 @@ function App() {
             {activeTab === 'sessions' && (
                 <div>
                 <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                    <h2 style={{ margin: 0, color: '#2c3e50' }}>Atendimentos em Tempo Real</h2>
+                    <div>
+                        <h2 style={{ margin: 0, color: '#2c3e50' }}>Atendimentos em Tempo Real</h2>
+                        {lastUpdated && <span style={{ fontSize: '12px', color: '#95a5a6' }}>Atualizado em: {lastUpdated.toLocaleTimeString()}</span>}
+                    </div>
                     <span style={{ fontSize: '13px', color: '#7f8c8d' }}>{sessions.length} conversas ativas</span>
                 </header>
+
+                {connectionError && (
+                    <div style={{ background: '#ffebee', color: '#c62828', padding: '15px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #ef9a9a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '24px' }}>⚠️</span>
+                        <div>
+                            <strong>Erro de Conexão:</strong> {connectionError}
+                            <div style={{ fontSize: '12px', marginTop: '5px' }}>Se você está no Render, verifique se a variável de ambiente <code>FIREBASE_SERVICE_ACCOUNT</code> está configurada corretamente.</div>
+                        </div>
+                    </div>
+                )}
                 
-                {sessions.length === 0 ? (
+                {sessions.length === 0 && !connectionError ? (
                     <div style={{ textAlign: 'center', padding: '60px', color: '#bdc3c7', background: 'white', borderRadius: '12px' }}>
                         <div style={{ fontSize: '40px', marginBottom: '10px' }}>📭</div>
                         Nenhum atendimento ativo no momento.
