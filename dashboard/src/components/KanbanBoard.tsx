@@ -7,16 +7,25 @@ interface Ticket {
   status: 'open' | 'in_progress' | 'waiting' | 'resolved';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   customerPhone: string;
+  assigneeId?: string;
   tags: string[];
   updatedAt: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
 interface KanbanBoardProps {
   token: string;
   baseUrl: string;
+  users: User[];
 }
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl, users }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
   const [showNewTicket, setShowNewTicket] = useState(false);
@@ -27,7 +36,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
     description: '',
     customerPhone: '',
     priority: 'medium' as Ticket['priority'],
-    status: 'open' as Ticket['status']
+    status: 'open' as Ticket['status'],
+    assigneeId: ''
   });
 
   const fetchTickets = async () => {
@@ -58,18 +68,22 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = { ...newTicket, tags: [] };
+      // Remove empty assigneeId
+      if (!payload.assigneeId) delete (payload as any).assigneeId;
+
       const res = await fetch(`${baseUrl}/api/tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ...newTicket, tags: [] })
+        body: JSON.stringify(payload)
       });
       
       if (res.ok) {
         setShowNewTicket(false);
-        setNewTicket({ title: '', description: '', customerPhone: '', priority: 'medium', status: 'open' });
+        setNewTicket({ title: '', description: '', customerPhone: '', priority: 'medium', status: 'open', assigneeId: '' });
         fetchTickets();
       }
     } catch (error) {
@@ -77,9 +91,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
     }
   };
 
-  const handleStatusChange = async (ticketId: string, newStatus: Ticket['status']) => {
+  const handleUpdateTicket = async (ticketId: string, updates: Partial<Ticket>) => {
     // Optimistic update
-    setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus } : t));
+    setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, ...updates } : t));
     
     try {
       await fetch(`${baseUrl}/api/tickets/${ticketId}`, {
@@ -88,10 +102,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify(updates)
       });
     } catch (error) {
-      console.error('Error updating status:', error);
+      console.error('Error updating ticket:', error);
       fetchTickets(); // Revert on error
     }
   };
@@ -113,7 +127,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
   };
 
   return (
-    <div style={{ padding: '20px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ padding: '20px', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
         <h2>Gestão de Atendimentos (Kanban)</h2>
         <button 
@@ -159,6 +173,18 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
                 <option value="high">Alta</option>
                 <option value="urgent">Urgente</option>
               </select>
+
+              <select 
+                value={newTicket.assigneeId} 
+                onChange={e => setNewTicket({...newTicket, assigneeId: e.target.value})}
+                style={{ padding: '8px' }}
+              >
+                <option value="">Sem Responsável</option>
+                {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button type="submit" style={{ flex: 1, padding: '10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}>Salvar</button>
                 <button type="button" onClick={() => setShowNewTicket(false)} style={{ flex: 1, padding: '10px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px' }}>Cancelar</button>
@@ -181,17 +207,31 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl }) => {
                   <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>{ticket.customerPhone}</div>
                   <div style={{ fontSize: '14px', marginBottom: '10px' }}>{ticket.description}</div>
                   
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <span style={{ fontSize: '10px', padding: '2px 6px', background: '#eee', borderRadius: '4px' }}>
                       {ticket.priority.toUpperCase()}
                     </span>
                     <select 
                       value={ticket.status} 
-                      onChange={(e) => handleStatusChange(ticket.id, e.target.value as any)}
+                      onChange={(e) => handleUpdateTicket(ticket.id, { status: e.target.value as any })}
                       style={{ fontSize: '12px', padding: '2px' }}
                     >
                       {columns.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                     </select>
+                  </div>
+
+                  <div style={{ fontSize: '12px', color: '#555', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                     <span>👤</span>
+                     <select 
+                        value={ticket.assigneeId || ''}
+                        onChange={(e) => handleUpdateTicket(ticket.id, { assigneeId: e.target.value })}
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', maxWidth: '150px' }}
+                     >
+                        <option value="">Atribuir...</option>
+                        {users.map(u => (
+                            <option key={u.id} value={u.id}>{u.name}</option>
+                        ))}
+                     </select>
                   </div>
                 </div>
               ))}

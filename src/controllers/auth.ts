@@ -1,19 +1,61 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { userService } from '../services/userService';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'lopes_secret_key_123';
 
 export const authController = {
     async login(req: Request, res: Response) {
-        const { username, password } = req.body;
+        const { username, password } = req.body; // username here is email
 
-        // Hardcoded admin for prototype
+        // Hardcoded admin fallback
         if (username === 'admin' && password === 'lopes2024') {
-            const token = jwt.sign({ username, role: 'admin' }, SECRET_KEY, { expiresIn: '24h' });
-            return res.json({ token });
+            const token = jwt.sign({ username: 'admin', role: 'admin', name: 'Master Admin' }, SECRET_KEY, { expiresIn: '24h' });
+            return res.json({ 
+                token, 
+                user: { name: 'Master Admin', email: 'admin', role: 'master', department: 'IT' } 
+            });
+        }
+
+        try {
+            const user = await userService.findSystemUserByEmail(username);
+            if (user && user.password === password) { // TODO: Use bcrypt
+                 const token = jwt.sign({ 
+                     id: user.id, 
+                     username: user.email, 
+                     role: user.role,
+                     name: user.name 
+                 }, SECRET_KEY, { expiresIn: '24h' });
+                 
+                 const { password, ...userSafe } = user;
+                 return res.json({ token, user: userSafe });
+            }
+        } catch (error) {
+            console.error('Login error:', error);
         }
 
         return res.status(401).json({ error: 'Invalid credentials' });
+    },
+
+    async getUsers(req: Request, res: Response) {
+        try {
+            const users = await userService.getAllSystemUsers();
+            res.json(users);
+        } catch (error) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
+    async createUser(req: Request, res: Response) {
+        try {
+            const { name, email, password, role, department } = req.body;
+            const newUser = await userService.createSystemUser({
+                name, email, password, role, department
+            });
+            res.status(201).json(newUser);
+        } catch (error: any) {
+            res.status(400).json({ error: error.message });
+        }
     }
 };
 
@@ -38,4 +80,6 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 import express from 'express';
 const router = express.Router();
 router.post('/login', authController.login);
+router.get('/users', authenticateJWT, authController.getUsers);
+router.post('/users', authenticateJWT, authController.createUser); // Only admin should access, handled by frontend for now or add middleware
 export default router;

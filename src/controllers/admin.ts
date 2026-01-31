@@ -47,6 +47,24 @@ export const adminController = {
         }
     },
 
+    async assignSession(req: Request, res: Response) {
+        try {
+            const { phone } = req.params;
+            const { assigneeId } = req.body;
+            
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
+
+            await db.collection('conversations').doc(phone).set({ 
+                assigneeId: assigneeId
+            }, { merge: true });
+
+            res.json({ success: true, assigneeId });
+        } catch (error) {
+            console.error('Error assigning session:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
     async getConversations(req: Request, res: Response) {
         try {
             if (!db) return res.status(503).json({ error: 'Database not initialized' });
@@ -92,6 +110,7 @@ export const adminController = {
                     step: 'active', // Default or fetch from session
                     tags: ['whatsapp'], // Default
                     status: data.status || 'active',
+                    assigneeId: data.assigneeId || null,
                     history: history // ordered desc
                 };
             }));
@@ -163,6 +182,7 @@ router.get('/sessions', adminController.getSessions);
 router.get('/conversations/:phone/messages', adminController.getMessages);
 router.post('/messages/send', adminController.sendMessage);
 router.post('/sessions/:phone/status', adminController.updateSessionStatus);
+router.post('/sessions/:phone/assign', adminController.assignSession);
 
 // Campaign endpoints
 router.get('/campaigns', adminController.getCampaigns);

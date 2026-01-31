@@ -1,14 +1,14 @@
 # Roadmap - Lopes Condomínios (Mega Plataforma)
 
-Este roadmap define a evolução da plataforma conversacional para se tornar um CRM completo de gestão condominial, superando ferramentas genéricas como Notion.
+Este roadmap define a evolução da plataforma conversacional para se tornar um CRM completo de gestão condominial, superando ferramentas genéricas como Notion e incorporando funcionalidades de alto nível baseadas na proposta comercial.
 
 ## ✅ Fase 1: Fundação & Conversação (Concluído)
-- [x] **Bot Inteligente (IA)**: Integração com Gemini 2.0 para respostas naturais.
+- [x] **Bot Inteligente (IA)**: Integração com Gemini para respostas naturais.
 - [x] **Canais Oficiais**: Conexão estável com WhatsApp via Z-API.
 - [x] **Integração Superlógica**: Consulta de boletos e segunda via por CPF.
 - [x] **Painel Administrativo Básico**: Visualização de atendimentos em tempo real.
 
-## 🚀 Fase 2: Gestão Visual & Intervenção Humana (ATUAL - Entregue Hoje)
+## ✅ Fase 2: Gestão Visual & Intervenção Humana (Concluído)
 - [x] **Modo Híbrido (Humano + Bot)**: 
   - Botão "Assumir Atendimento" (Pausa o robô instantaneamente).
   - Envio de mensagens manuais direto pelo Dashboard.
@@ -18,26 +18,37 @@ Este roadmap define a evolução da plataforma conversacional para se tornar um 
 - [x] **Tickets & Chamados**:
   - Criação de tickets internos (ex: "Vazamento Bloco B").
   - Definição de prioridades (Baixa, Média, Alta, Urgente).
+- [x] **Atribuição de Responsáveis**:
+  - Designação de membros da equipe para atendimentos específicos.
 
-## 🌟 Fase 3: CRM Premium & Inteligência de Negócio (Próximos Passos)
-- [ ] **Funil de Vendas/Cobrança**: 
-  - Pipeline visual para acompanhar acordos de inadimplência.
-  - Automação de follow-up (cobrança automática).
-- [ ] **Base de Conhecimento Inteligente**:
-  - Upload de PDFs (Regimento Interno, Atas) para a IA consultar.
-  - O bot responderá dúvidas específicas sobre regras do condomínio.
-- [ ] **Gestão de Equipe**:
-  - Perfis de acesso (Atendente, Gerente, Master).
-  - Distribuição automática de chats por departamento (Financeiro, Manutenção).
-- [ ] **Métricas & Relatórios (BI)**:
-  - Gráficos de volume de atendimento.
-  - Tempo médio de resposta.
-  - Principais motivos de contato (Nuvem de palavras).
+## 🌟 Fase 3: Omnichannel & CRM Conversacional Avançado (Próximos Passos)
+Baseado nos requisitos do "Helena CRM":
+- [ ] **Omnichannel Real**:
+  - Integração com Instagram Direct e Facebook Messenger.
+  - Centralização de todas as conversas em uma única caixa de entrada.
+- [ ] **CRM Conversacional**:
+  - Rastreabilidade de leads (origem do contato).
+  - Etiquetas e segmentação avançada de contatos.
+  - Histórico unificado de interações multicanal.
+- [ ] **Automação & Integrações (Make/N8N)**:
+  - Webhooks para eventos de chat (início, fim, transferência).
+  - Conectores para automação de processos complexos sem código.
 
-## 🔮 Fase 4: Expansão & Ecossistema
-- [ ] **App Mobile para Síndicos**: Versão simplificada do painel.
-- [ ] **Disparo em Massa Inteligente**: Campanhas segmentadas por tag (ex: "Apenas Bloco A").
-- [ ] **Integração Financeira Profunda**: Negociação de dívidas com cálculo automático de juros.
+## 🚀 Fase 4: Marketing & Cobrança Ativa
+- [ ] **Campanhas e Disparos**:
+  - Agendamento de disparos em massa (Broadcast).
+  - Segmentação por tags (ex: "Inadimplentes", "Bloco A").
+  - Relatórios de entrega e leitura.
+- [ ] **Cobrança Inteligente**:
+  - Régua de cobrança automatizada via WhatsApp.
+  - Negociação assistida por IA.
+
+## 🔮 Fase 5: Inteligência & Gestão 360º
+- [ ] **Base de Conhecimento RAG (Retrieval-Augmented Generation)**:
+  - Upload de Regimento Interno e Atas para respostas precisas da IA.
+- [ ] **Business Intelligence (BI)**:
+  - Dashboards de performance da equipe.
+  - Análise de sentimentos das conversas.
 
 ---
-**Status Atual**: Fase 2 Completa. O sistema agora permite controle total sobre o fluxo de conversa, permitindo que humanos intervenham quando a IA não for suficiente.
+**Status Atual**: Entrando na Fase 3. Foco em expandir canais e aprofundar as capacidades de CRM.
