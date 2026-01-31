@@ -18,37 +18,31 @@ export const databaseService = {
         }
 
         try {
-            // Sanitize message object to remove undefined values
-            const msgData = JSON.parse(JSON.stringify({
-                ...message,
-                timestamp: message.timestamp // Preserve date object for now
-            }));
+            // Determine a safe sender name
+            const safeSenderName = message.senderName || (message.role === 'assistant' ? 'Bot Lopes' : 'Cliente');
+
+            // Explicitly construct the object to ensure no undefined values are passed
+            const msgData = {
+                phone: message.phone,
+                content: message.content,
+                role: message.role,
+                timestamp: admin.firestore.Timestamp.fromDate(message.timestamp),
+                senderName: safeSenderName
+            };
 
             // Save to 'conversations/{phone}/messages'
             await db.collection('conversations')
                 .doc(message.phone)
                 .collection('messages')
-                .add({
-                    ...msgData,
-                    timestamp: admin.firestore.Timestamp.fromDate(message.timestamp)
-                });
+                .add(msgData);
 
             // Update last message in conversation doc
-            const conversationUpdate: any = {
+            const conversationUpdate = {
                 lastMessage: message.content,
                 lastActivity: admin.firestore.Timestamp.fromDate(message.timestamp),
-                phone: message.phone
+                phone: message.phone,
+                senderName: safeSenderName
             };
-            
-            // Only update senderName if it's provided (don't overwrite with Unknown if we already have it)
-            if (message.senderName) {
-                conversationUpdate.senderName = message.senderName;
-            } else {
-                // If it's a new conversation, we need a name. 
-                // We use set with merge, so we can check if it exists? No, set merges.
-                // We'll set it to Unknown only if we don't have it, but we can't condition on existence easily in one op.
-                // But typically user messages come first and have a name.
-            }
 
             await db.collection('conversations').doc(message.phone).set(conversationUpdate, { merge: true });
 
