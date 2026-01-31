@@ -35,32 +35,39 @@ export const botFlow = {
       switch (session.state) {
         case 'IDLE':
           // Start conversation / Identify user
-          await zapiService.sendText(phone, `Olá ${senderName}, sou o assistente virtual da Lopes Condomínios. Como posso ajudar hoje?`);
-          sessionManager.updateState(phone, 'WAITING_MENU');
+          if (message.toLowerCase().match(/^(oi|ola|olá|bom dia|boa tarde|boa noite|iniciar|start|menu)$/)) {
+            await zapiService.sendText(phone, `Olá ${senderName}, sou o assistente virtual da Lopes Condomínios. Como posso ajudar hoje?`, 'assistant', 'Bot Lopes');
+            sessionManager.updateState(phone, 'WAITING_MENU');
+          } else {
+             // If user sends a specific query immediately, skip greeting and process
+             sessionManager.updateState(phone, 'WAITING_MENU');
+             // Re-process the message in the new state
+             await botFlow.handleMessage(phone, message, senderName); 
+          }
           break;
 
         case 'WAITING_MENU':
           if (message.toLowerCase().includes('boleto') || message.includes('1')) {
-             await zapiService.sendText(phone, 'Por favor, digite o CPF do titular (apenas números) para eu localizar seus boletos.');
+             await zapiService.sendText(phone, 'Por favor, digite o CPF do titular (apenas números) para eu localizar seus boletos.', 'assistant', 'Bot Lopes');
              sessionManager.updateState(phone, 'WAITING_CPF');
           } else if (message.toLowerCase().includes('reserva') || message.includes('2')) {
-             await zapiService.sendText(phone, 'Para reservas, acesse nosso portal: https://lopes.superlogica.net/clients/areadocondomino');
+             await zapiService.sendText(phone, 'Para reservas, acesse nosso portal: https://lopes.superlogica.net/clients/areadocondomino', 'assistant', 'Bot Lopes');
              sessionManager.updateState(phone, 'IDLE'); // Reset
           } else {
              // Default to AI for general questions
              const aiResponse = await aiService.generateResponse(message);
-             await zapiService.sendText(phone, aiResponse);
+             await zapiService.sendText(phone, aiResponse, 'assistant', 'Bot Lopes');
           }
           break;
 
         case 'WAITING_CPF':
           const cpf = message.replace(/\D/g, '');
           if (cpf.length !== 11) {
-             await zapiService.sendText(phone, 'CPF inválido. Por favor, digite novamente (11 números).');
+             await zapiService.sendText(phone, 'CPF inválido. Por favor, digite novamente (11 números).', 'assistant', 'Bot Lopes');
              return;
           }
 
-          await zapiService.sendText(phone, 'Buscando boletos... aguarde um momento.');
+          await zapiService.sendText(phone, 'Buscando boletos... aguarde um momento.', 'assistant', 'Bot Lopes');
           
           try {
             const slips = await superlogicaService.getPendingSlips(cpf);
@@ -69,13 +76,13 @@ export const botFlow = {
                 slips.forEach((slip: any) => {
                     responseText += `📅 Vencimento: ${slip.dt_vencimento_recb}\n💰 Valor: R$ ${slip.vl_emitido_recb}\n🔢 Linha Digitável: ${slip.linhadigitavel_recb}\n👉 Link: ${slip.link_segunda_via}\n\n`;
                 });
-                await zapiService.sendText(phone, responseText);
+                await zapiService.sendText(phone, responseText, 'assistant', 'Bot Lopes');
             } else {
-                await zapiService.sendText(phone, 'Não encontrei boletos pendentes para este CPF.');
+                await zapiService.sendText(phone, 'Não encontrei boletos pendentes para este CPF.', 'assistant', 'Bot Lopes');
             }
           } catch (err) {
              console.error('Error fetching slips:', err);
-             await zapiService.sendText(phone, 'Houve um erro ao consultar os boletos. Tente novamente mais tarde.');
+             await zapiService.sendText(phone, 'Houve um erro ao consultar os boletos. Tente novamente mais tarde.', 'assistant', 'Bot Lopes');
           }
           sessionManager.updateState(phone, 'IDLE');
           break;
@@ -87,7 +94,7 @@ export const botFlow = {
 
     } catch (error) {
       console.error('[Flow] Error handling message:', error);
-      await zapiService.sendText(phone, 'Desculpe, tive um erro interno. Tente novamente.');
+      await zapiService.sendText(phone, 'Desculpe, tive um erro interno. Tente novamente.', 'assistant', 'Bot Lopes');
     }
   }
 };

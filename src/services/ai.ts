@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
 export const aiService = {
   generateResponse: async (prompt: string): Promise<string> => {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
       
       const systemContext = `
         Você é um assistente virtual da Lopes Condomínios.
@@ -16,11 +16,15 @@ export const aiService = {
       `;
 
       const result = await model.generateContent(`${systemContext}\n\nUsuário: ${prompt}`);
-      const response = await result.response;
-      return response.text();
-    } catch (error) {
-      console.error('AI Error:', error);
-      return 'Desculpe, não consegui processar sua solicitação no momento.';
-    }
-  }
-};
+              const response = await result.response;
+              return response.text();
+            } catch (error: any) {
+              console.error('AI Error:', error);
+              // Log specific error details for debugging
+              if (error.message?.includes('API key')) {
+                  console.error('CRITICAL: Invalid or missing Gemini API Key. Please check GEMINI_API_KEY in .env or Render Environment Variables.');
+              }
+              return 'Desculpe, não consegui processar sua solicitação no momento. (Erro interno do assistente)';
+            }
+          }
+        };
