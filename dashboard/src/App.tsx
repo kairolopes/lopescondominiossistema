@@ -44,6 +44,8 @@ function App() {
   // Forms
   const [broadcastMsg, setBroadcastMsg] = useState('');
   const [broadcastPhones, setBroadcastPhones] = useState('');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   // Chat Reply State
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
