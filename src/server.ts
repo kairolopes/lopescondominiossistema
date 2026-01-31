@@ -26,7 +26,7 @@ app.get('/api/health', async (req, res) => {
             server: 'online',
             timestamp: new Date().toISOString(),
             firebase: 'unknown',
-            ai_service: config.gemini.apiKey ? 'configured' : 'missing_key'
+            ai_service: config.openai.apiKey ? 'configured' : 'missing_key'
         };
 
         if (db) {

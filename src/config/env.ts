@@ -15,9 +15,10 @@ export const config = {
     url: process.env.SUPERLOGICA_URL || 'https://api.superlogica.net/v2/condor',
   },
   openai: {
-    // Deprecated
+    apiKey: process.env.OPENAI_API_KEY || '',
   },
   gemini: {
+    // Deprecated in favor of OpenAI
     apiKey: process.env.GEMINI_API_KEY || '',
   }
 };
