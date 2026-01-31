@@ -27,7 +27,7 @@ export const adminController = {
                 const phone = data.phone;
 
                 // Fetch recent messages for history
-                const messagesSnapshot = await db.collection('conversations')
+                const messagesSnapshot = await db!.collection('conversations')
                     .doc(phone)
                     .collection('messages')
                     .orderBy('timestamp', 'desc')
