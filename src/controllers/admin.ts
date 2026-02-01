@@ -7,29 +7,33 @@ import { sessionManager } from '../services/sessionManager';
 export const adminController = {
     async sendMessage(req: Request, res: Response) {
         try {
-            const { phone, message, senderName } = req.body;
+            const { phone, message, senderName, senderRole } = req.body;
             if (!phone || !message) return res.status(400).json({ error: 'Missing phone or message' });
 
             // 0. Check for Super Admin / Reset Command from Agent
             if (message.trim().toLowerCase() === '#bot' || message.trim().toLowerCase() === '#reset') {
                 console.log(`[Admin] Agent forced session reset for ${phone}`);
                 sessionManager.updateState(phone, 'IDLE');
-                // Sync with DB
                 if (db) {
                      await db.collection('conversations').doc(phone).set({ 
                         status: 'active',
                         pausedAt: null
                     }, { merge: true });
                 }
-                // Send confirmation to agent (optional, or just send the text to user so they know bot is back)
-                // We still send the text "#bot" to the user as confirmation, or we could suppress it.
-                // Usually better to send it so the user sees something happened, or send a specific "Bot reativado" message.
-                // For now, let's send the text as requested, but maybe append a system note? 
-                // No, just send what the agent typed, but perform the logic.
+            }
+
+            // Construct Message with Signature if sender info is present
+            // Format: *Name - Role*
+            //         Message
+            let finalMessage = message;
+            if (senderName) {
+                const roleDisplay = senderRole ? ` - ${senderRole}` : '';
+                finalMessage = `*${senderName}${roleDisplay}*\n${message}`;
             }
 
             // Send via WhatsApp (Official API/Antigravity)
-            await whatsappService.sendText(phone, message, 'agent', senderName);
+            // We pass 'agent' as type, but the content now includes the signature
+            await whatsappService.sendText(phone, finalMessage, 'agent', senderName);
             
             res.json({ success: true });
         } catch (error) {
