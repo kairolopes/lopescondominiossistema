@@ -5,6 +5,7 @@ interface Session {
     name: string;
     state: string;
     lastActivity: Date;
+    pausedAt?: Date; // New field to track pause start time
     data: any;
 }
 
@@ -15,7 +16,26 @@ export const sessionManager = {
     
     ensureSession: async (phone: string, name: string) => {
         // 1. Check Memory
-        if (sessions.has(phone)) return sessions.get(phone)!;
+        if (sessions.has(phone)) {
+            const session = sessions.get(phone)!;
+            // Check for auto-resume in memory
+            if (session.state === 'PAUSED' && session.pausedAt) {
+                const diffMinutes = (new Date().getTime() - session.pausedAt.getTime()) / (1000 * 60);
+                if (diffMinutes > 20) {
+                    console.log(`[SessionManager] Auto-resuming session for ${phone} (Paused for ${diffMinutes.toFixed(0)}m)`);
+                    session.state = 'IDLE';
+                    session.pausedAt = undefined;
+                    // Sync with DB
+                    if (db) {
+                         await db.collection('conversations').doc(phone).set({ 
+                            status: 'active',
+                            pausedAt: null
+                        }, { merge: true });
+                    }
+                }
+            }
+            return session;
+        }
 
         // 2. Check Database (Conversations)
         if (db) {
@@ -23,11 +43,33 @@ export const sessionManager = {
                 const doc = await db.collection('conversations').doc(phone).get();
                 if (doc.exists) {
                     const data = doc.data();
+                    let state = data?.status === 'paused' ? 'PAUSED' : 'IDLE';
+                    let pausedAt = data?.pausedAt?.toDate ? data.pausedAt.toDate() : (data?.pausedAt ? new Date(data.pausedAt) : undefined);
+
+                    // Auto-Resume Logic on Restoration
+                    if (state === 'PAUSED') {
+                        // If no pausedAt found but is paused, assume lastActivity as fallback
+                        const effectivePausedTime = pausedAt || (data?.lastActivity?.toDate ? data.lastActivity.toDate() : new Date());
+                        const diffMinutes = (new Date().getTime() - effectivePausedTime.getTime()) / (1000 * 60);
+
+                        if (diffMinutes > 20) {
+                            console.log(`[SessionManager] Auto-resuming restored session for ${phone} (Paused for ${diffMinutes.toFixed(0)}m)`);
+                            state = 'IDLE';
+                            pausedAt = undefined;
+                            // Update DB immediately
+                            await db.collection('conversations').doc(phone).set({ 
+                                status: 'active',
+                                pausedAt: null
+                            }, { merge: true });
+                        }
+                    }
+
                     const session: Session = {
                         phone,
                         name: data?.senderName || name,
-                        state: data?.status === 'paused' ? 'PAUSED' : 'IDLE', // Resuming from DB
+                        state,
                         lastActivity: data?.lastActivity?.toDate ? data.lastActivity.toDate() : new Date(),
+                        pausedAt,
                         data: {} 
                     };
                     sessions.set(phone, session);
@@ -44,7 +86,7 @@ export const sessionManager = {
     },
 
     createSession: (phone: string, name: string) => {
-        const session = {
+        const session: Session = {
             phone,
             name,
             state: 'IDLE',
@@ -60,6 +102,11 @@ export const sessionManager = {
         if (session) {
             session.state = state;
             session.lastActivity = new Date();
+            if (state === 'PAUSED') {
+                session.pausedAt = new Date();
+            } else {
+                session.pausedAt = undefined;
+            }
             session.data = { ...session.data, ...data };
             sessions.set(phone, session);
         }

@@ -30,7 +30,8 @@ export const adminController = {
             // Update Firestore
             await db.collection('conversations').doc(phone).set({ 
                 status: status,
-                lastActivity: new Date()
+                lastActivity: new Date(),
+                pausedAt: status === 'paused' ? new Date() : null
             }, { merge: true });
 
             // Update In-Memory Session Manager
