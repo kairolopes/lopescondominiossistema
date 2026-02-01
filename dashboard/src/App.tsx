@@ -37,7 +37,7 @@ function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [user, setUser] = useState<User | null>(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null);
 
-  const [activeTab, setActiveTab] = useState<'sessions' | 'kanban' | 'campaigns' | 'broadcast' | 'team'>('sessions');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'sessions' | 'kanban' | 'campaigns' | 'broadcast' | 'team'>('dashboard');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [usersList, setUsersList] = useState<User[]>([]);
@@ -207,7 +207,8 @@ function App() {
             body: JSON.stringify({ 
               phone, 
               message,
-              senderName: user?.name || 'Agente'
+              senderName: user?.name || 'Agente',
+              senderRole: user?.role // Pass role for signature
             })
         });
         setReplyText(prev => ({ ...prev, [phone]: '' }));
@@ -263,6 +264,95 @@ function App() {
       <div className="main-content w-full">
         <div className="page-container">
             
+            {/* DASHBOARD TAB */}
+            {activeTab === 'dashboard' && (
+                <div style={{ padding: '24px', overflowY: 'auto', height: '100%' }}>
+                    <header style={{ marginBottom: '32px' }}>
+                        <h1>Visão Geral (Dashboard)</h1>
+                        <p style={{ color: 'var(--text-secondary)' }}>Bem-vindo, {user?.name}</p>
+                    </header>
+                    
+                    {/* KPI Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '48px' }}>
+                        <div className="card" style={{ padding: '24px', borderLeft: '4px solid #2ecc71' }}>
+                            <h3 style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Atendimentos Ativos</h3>
+                            <div style={{ fontSize: '32px', fontWeight: 'bold', marginTop: '8px' }}>{sessions.filter(s => s.status !== 'PAUSED').length}</div>
+                        </div>
+                        <div className="card" style={{ padding: '24px', borderLeft: '4px solid #e74c3c' }}>
+                            <h3 style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Pausados (Em Atendimento)</h3>
+                            <div style={{ fontSize: '32px', fontWeight: 'bold', marginTop: '8px' }}>{sessions.filter(s => s.status === 'PAUSED').length}</div>
+                        </div>
+                         <div className="card" style={{ padding: '24px', borderLeft: '4px solid #f1c40f' }}>
+                            <h3 style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Urgentes (Pausado &gt; 15m)</h3>
+                            <div style={{ fontSize: '32px', fontWeight: 'bold', marginTop: '8px' }}>
+                                {sessions.filter(s => {
+                                    if (s.status !== 'PAUSED') return false;
+                                    const lastMsg = s.history[s.history.length-1];
+                                    if (!lastMsg) return false;
+                                    const diff = (new Date().getTime() - new Date(lastMsg.timestamp).getTime()) / (1000 * 60);
+                                    return diff > 15;
+                                }).length}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Lists */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                        <div>
+                            <h3 style={{ marginBottom: '16px' }}>🔥 Atenção Necessária (Pausados &gt; 15min)</h3>
+                            <div className="flex flex-col gap-3">
+                                {sessions.filter(s => {
+                                    if (s.status !== 'PAUSED') return false;
+                                    const lastMsg = s.history[s.history.length-1];
+                                    if (!lastMsg) return false;
+                                    const diff = (new Date().getTime() - new Date(lastMsg.timestamp).getTime()) / (1000 * 60);
+                                    return diff > 15;
+                                }).map(s => (
+                                    <div key={s.phone} className="kanban-card" onClick={() => setActiveTab('sessions')} style={{ cursor: 'pointer' }}>
+                                        <div className="flex justify-between">
+                                            <strong>{s.phone}</strong>
+                                            <span className="tag" style={{ background: '#ffebee', color: '#c62828' }}>Urgente</span>
+                                        </div>
+                                        <div style={{ fontSize: '12px', marginTop: '8px' }}>
+                                            Última msg: {s.history[s.history.length-1] ? new Date(s.history[s.history.length-1].timestamp).toLocaleTimeString() : 'N/A'}
+                                        </div>
+                                    </div>
+                                ))}
+                                {sessions.filter(s => {
+                                    if (s.status !== 'PAUSED') return false;
+                                    const lastMsg = s.history[s.history.length-1];
+                                    if (!lastMsg) return false;
+                                    const diff = (new Date().getTime() - new Date(lastMsg.timestamp).getTime()) / (1000 * 60);
+                                    return diff > 15;
+                                }).length === 0 && <p style={{color: 'var(--text-secondary)'}}>Nenhum atendimento urgente.</p>}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style={{ marginBottom: '16px' }}>⏳ Sem Interação (&gt; 2h)</h3>
+                            <div className="flex flex-col gap-3">
+                                {sessions.filter(s => {
+                                    const lastMsg = s.history[s.history.length-1];
+                                    if (!lastMsg) return false;
+                                    const diff = (new Date().getTime() - new Date(lastMsg.timestamp).getTime()) / (1000 * 60 * 60);
+                                    return diff > 2;
+                                }).map(s => (
+                                    <div key={s.phone} className="kanban-card" onClick={() => setActiveTab('sessions')} style={{ cursor: 'pointer' }}>
+                                        <div className="flex justify-between">
+                                            <strong>{s.phone}</strong>
+                                            <span className="tag">{s.step}</span>
+                                        </div>
+                                        <div style={{ fontSize: '12px', marginTop: '8px' }}>
+                                            Espera: {Math.floor((new Date().getTime() - new Date(s.history[s.history.length-1].timestamp).getTime()) / (1000 * 60 * 60))}h
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* SESSIONS TAB */}
             {activeTab === 'sessions' && (
                 <div>
