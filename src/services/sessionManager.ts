@@ -52,6 +52,8 @@ export const sessionManager = {
                         const effectivePausedTime = pausedAt || (data?.lastActivity?.toDate ? data.lastActivity.toDate() : new Date());
                         const diffMinutes = (new Date().getTime() - effectivePausedTime.getTime()) / (1000 * 60);
 
+                        console.log(`[SessionManager] Session ${phone} is PAUSED. Duration: ${diffMinutes.toFixed(1)}m (Threshold: 20m)`);
+
                         if (diffMinutes > 20) {
                             console.log(`[SessionManager] Auto-resuming restored session for ${phone} (Paused for ${diffMinutes.toFixed(0)}m)`);
                             state = 'IDLE';
