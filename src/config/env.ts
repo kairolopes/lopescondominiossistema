@@ -23,6 +23,7 @@ export const config = {
   openai: {
     apiKey: process.env.OPENAI_API_KEY || '',
   },
+  aiProvider: process.env.AI_PROVIDER || 'openai', // 'openai' or 'gemini'
   gemini: {
     // Primary AI (Antigravity/Google)
     apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '',
