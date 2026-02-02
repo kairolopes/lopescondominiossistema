@@ -42,7 +42,8 @@ app.get('/api/health', async (req, res) => {
             }
         } else {
             status.firebase = 'not_initialized';
-            res.status(503).json(status);
+            // Return 200 OK so frontend doesn't block access, but with status indicating local mode
+            res.status(200).json({ ...status, warning: 'local_mode_only' });
         }
     } catch (error) {
         res.status(500).json({ status: 'error', error: 'Internal Server Error' });

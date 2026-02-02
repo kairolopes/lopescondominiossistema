@@ -1,0 +1,30 @@
+COMO CONFIGURAR O BANCO DE DADOS (FIREBASE)
+==============================================
+
+Para que o robô salve as conversas e o painel mostre os atendimentos, você precisa conectar o Firebase.
+
+PASSO 1: ACESSAR O FIREBASE
+1. Entre em: https://console.firebase.google.com/
+2. Se já tiver um projeto, clique nele. Se não, crie um novo (ex: "Lopes Condomínios").
+
+PASSO 2: CRIAR O BANCO DE DADOS (FIRESTORE)
+1. No menu esquerdo, clique em "Criação" > "Firestore Database".
+2. Clique em "Criar banco de dados".
+3. Escolha o local (us-central1 ou southamerica-east1) e clique em Avançar.
+4. Escolha "Iniciar no modo de teste" (para começar rápido) e clique em Criar.
+
+PASSO 3: GERAR A CHAVE DE ACESSO
+1. No menu esquerdo, clique na engrenagem (Configurações) > "Configurações do projeto".
+2. Vá na aba "Contas de serviço".
+3. Clique no botão "Gerar nova chave privada".
+4. Confirme clicando em "Gerar chave".
+5. Um arquivo .json será baixado no seu computador.
+
+PASSO 4: INSTALAR A CHAVE
+1. Pegue o arquivo que você baixou.
+2. Renomeie ele para "serviceAccountKey.json".
+3. Substitua o arquivo "serviceAccountKey.json" que eu criei na pasta do projeto por este novo arquivo.
+   (C:\Users\usuario\Documents\Kairo\lopescondominios\serviceAccountKey.json)
+
+PRONTO!
+Assim que você colar o arquivo real, o erro no terminal vai sumir e o sistema vai começar a salvar tudo.
