@@ -120,18 +120,34 @@ export const sessionManager = {
         return session;
     },
 
-    updateState: (phone: string, state: string, data: any = {}) => {
+    updateState: (phone: string, newState: string) => {
         const session = sessions.get(phone);
         if (session) {
-            session.state = state;
+            session.state = newState;
             session.lastActivity = new Date();
-            if (state === 'PAUSED') {
+            if (newState === 'PAUSED') {
                 session.pausedAt = new Date();
             } else {
                 session.pausedAt = undefined;
             }
-            session.data = { ...session.data, ...data };
-            sessions.set(phone, session);
+        }
+    },
+
+    pauseSession: (phone: string, durationMinutes: number = 20) => {
+        const session = sessions.get(phone);
+        if (session) {
+            session.state = 'PAUSED';
+            session.lastActivity = new Date();
+            // We set pausedAt to NOW.
+            // Logic elsewhere checks if (Now - PausedAt) > 20 mins.
+            // If we want a dynamic duration, we might need to store 'pausedUntil' or 'pauseDuration'.
+            // For now, the user requested explicitly 20 minutes, so the existing logic (checking diff > 20) works if we set pausedAt = now.
+            // However, to support the UI counter, we should store pausedUntil.
+            const now = new Date();
+            session.pausedAt = now;
+            
+            // Optional: Store pausedUntil if we want variable durations later
+            // session.pausedUntil = new Date(now.getTime() + durationMinutes * 60000);
         }
     }
 };

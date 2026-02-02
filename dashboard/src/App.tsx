@@ -3,14 +3,18 @@ import { Login } from './Login';
 import { KanbanBoard } from './components/KanbanBoard';
 import { Sidebar } from './components/Sidebar';
 import { Profile } from './components/Profile';
+import { SessionCard } from './components/SessionCard';
 
 interface Session {
   phone: string;
+  name?: string;
   step: string;
   status?: string; // 'active' | 'paused'
+  pausedAt?: string | null;
   tags: string[];
   history: { role: 'user' | 'bot' | 'agent', content: string, timestamp: string, senderName?: string }[];
   assigneeId?: string;
+  profilePicUrl?: string;
 }
 
 interface Campaign {
@@ -232,13 +236,12 @@ function App() {
     }
   };
 
-  const handleTogglePause = async (phone: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'PAUSED' ? 'active' : 'paused';
+  const handleTogglePause = async (phone: string, targetStatus: string, duration?: number) => {
     try {
         await fetchWithAuth(`${API_URL}/sessions/${phone}/status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
+            body: JSON.stringify({ status: targetStatus, duration })
         });
         fetchSessions();
     } catch (err) {
@@ -294,8 +297,8 @@ function App() {
                 <header className="flex justify-between items-center" style={{ marginBottom: '32px' }}>
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1>Atendimentos</h1>
-                            <span style={{ fontSize: '12px', background: '#e3f2fd', color: '#1565c0', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bbdefb' }}>
+                            <h1 style={{ margin: 0 }}>Atendimentos</h1>
+                            <span style={{ fontSize: '12px', background: '#e3f2fd', color: '#1565c0', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bbdefb', whiteSpace: 'nowrap' }}>
                                 ⚡ Antigravity System
                             </span>
                         </div>
@@ -316,83 +319,18 @@ function App() {
                         Nenhum atendimento ativo no momento.
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '24px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '24px' }}>
                     {sessions.map(session => (
-                        <div key={session.phone} className="kanban-card" style={{ display: 'flex', flexDirection: 'column', height: '520px', padding: 0, overflow: 'hidden' }}>
-                        
-                        {/* Card Header */}
-                        <div style={{ padding: '16px', borderBottom: '1px solid var(--border-subtle)', background: '#fafafa' }}>
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 style={{ fontSize: '15px', fontFamily: 'monospace' }}>{session.phone}</h3>
-                                <div className="flex gap-2">
-                                    <span className="tag">{session.step}</span>
-                                    {session.status === 'PAUSED' && <span className="tag" style={{ background: '#ffebee', color: '#c62828' }}>Pausado</span>}
-                                </div>
-                            </div>
-                            
-                            <div className="flex justify-between items-center">
-                                <select
-                                    value={session.assigneeId || ''}
-                                    onChange={(e) => handleAssignSession(session.phone, e.target.value)}
-                                    style={{ width: 'auto', fontSize: '12px', padding: '4px 8px', background: 'white', border: '1px solid var(--border-subtle)' }}
-                                >
-                                    <option value="">➡️ Transferir para...</option>
-                                    {usersList.map(u => (
-                                        <option key={u.id} value={u.id}>{u.name}</option>
-                                    ))}
-                                </select>
-
-                                <button 
-                                    onClick={() => handleTogglePause(session.phone, session.status || 'active')}
-                                    className="btn"
-                                    style={{ fontSize: '12px', color: session.status === 'PAUSED' ? '#2ecc71' : '#e74c3c' }}
-                                >
-                                    {session.status === 'PAUSED' ? '▶ Retomar Bot' : '⏸ Assumir'}
-                                </button>
-                            </div>
-                        </div>
-                        
-                        {/* Messages Area */}
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column-reverse', background: 'white' }}>
-                            {session.history.slice().reverse().map((msg, idx) => (
-                            <div key={idx} style={{ marginBottom: '16px', textAlign: msg.role === 'user' ? 'left' : 'right' }}>
-                                <div style={{ 
-                                display: 'inline-block', 
-                                padding: '8px 12px', 
-                                borderRadius: '8px', 
-                                background: msg.role === 'user' ? 'white' : '#f0f0f0',
-                                border: msg.role === 'user' ? '1px solid var(--border-subtle)' : 'none',
-                                color: 'var(--text-primary)',
-                                maxWidth: '85%',
-                                fontSize: '13px',
-                                lineHeight: '1.5'
-                                }}>
-                                {msg.content}
-                                </div>
-                                <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                    {msg.role === 'bot' ? '🤖 Antigravity Bot' : (msg.role === 'user' ? 'Cliente' : (msg.senderName || 'Agente'))} • {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                </div>
-                            </div>
-                            ))}
-                        </div>
-
-                        {/* Input Area */}
-                        <div style={{ padding: '12px', borderTop: '1px solid var(--border-subtle)', background: '#fafafa', display: 'flex', gap: '8px' }}>
-                            <input 
-                                value={replyText[session.phone] || ''}
-                                onChange={e => setReplyText(prev => ({...prev, [session.phone]: e.target.value}))}
-                                placeholder="Responder..."
-                                style={{ background: 'white', border: '1px solid var(--border-subtle)' }}
-                                onKeyDown={e => { if(e.key === 'Enter') handleSendMessage(session.phone) }}
-                            />
-                            <button 
-                                onClick={() => handleSendMessage(session.phone)}
-                                className="btn btn-primary"
-                            >
-                                ➤
-                            </button>
-                        </div>
-                        </div>
+                        <SessionCard 
+                            key={session.phone}
+                            session={session}
+                            users={usersList}
+                            replyText={replyText[session.phone] || ''}
+                            setReplyText={(text) => setReplyText(prev => ({...prev, [session.phone]: text}))}
+                            onSendMessage={() => handleSendMessage(session.phone)}
+                            onTogglePause={handleTogglePause}
+                            onAssign={handleAssignSession}
+                        />
                     ))}
                     </div>
                 )}

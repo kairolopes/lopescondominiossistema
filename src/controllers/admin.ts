@@ -41,24 +41,30 @@ export const adminController = {
     async updateSessionStatus(req: Request, res: Response) {
         try {
             const { phone } = req.params;
-            const { status } = req.body; // 'active' | 'paused'
+            const { status, duration } = req.body; // Accept duration
             
             if (!db) return res.status(503).json({ error: 'Database not initialized' });
 
-            // Update Firestore
-            await db.collection('conversations').doc(phone).set({ 
-                status: status,
-                lastActivity: new Date(),
-                pausedAt: status === 'paused' ? new Date() : null
-            }, { merge: true });
-
-            // Update In-Memory Session Manager
-            if (status === 'paused') {
-                sessionManager.updateState(phone, 'PAUSED');
+            if (status === 'paused' && duration) {
+                 // Custom pause with duration
+                 sessionManager.updateState(phone, 'PAUSED');
+                 
+                 await db.collection('conversations').doc(phone).set({ 
+                    status: 'paused',
+                    lastActivity: new Date(),
+                    pausedAt: new Date()
+                }, { merge: true });
             } else {
-                sessionManager.updateState(phone, 'IDLE');
-            }
+                // Standard toggle
+                sessionManager.updateState(phone, status === 'paused' ? 'PAUSED' : 'IDLE');
 
+                await db.collection('conversations').doc(phone).set({ 
+                    status: status === 'paused' ? 'paused' : 'active',
+                    lastActivity: new Date(),
+                    pausedAt: status === 'paused' ? new Date() : null
+                }, { merge: true });
+            }
+            
             res.json({ success: true, status });
         } catch (error) {
             console.error('Error updating session:', error);

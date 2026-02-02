@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const config = {
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 3006,
   zapi: {
     instanceId: process.env.ZAPI_INSTANCE_ID || '',
     token: process.env.ZAPI_TOKEN || '',
