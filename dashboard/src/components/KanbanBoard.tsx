@@ -23,9 +23,10 @@ interface KanbanBoardProps {
   token: string;
   baseUrl: string;
   users: User[];
+  currentUser: User | null;
 }
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl, users }) => {
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl, users, currentUser }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
   const [showNewTicket, setShowNewTicket] = useState(false);
@@ -210,12 +211,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl, users 
             <div style={{ padding: '8px 4px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '14px', fontWeight: 500 }}>
               <span>{col.label}</span>
               <span style={{ fontSize: '12px', background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
-                {tickets.filter(t => t.status === col.id).length}
+                {visibleTickets.filter(t => t.status === col.id).length}
               </span>
             </div>
             
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {tickets.filter(t => t.status === col.id).map(ticket => (
+              {visibleTickets.filter(t => t.status === col.id).map(ticket => (
                 <div key={ticket.id} className="kanban-card" style={{ cursor: 'pointer' }}>
                   <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '4px', color: 'var(--text-primary)' }}>
                     {ticket.title}

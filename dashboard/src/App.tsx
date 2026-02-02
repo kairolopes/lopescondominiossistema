@@ -263,6 +263,13 @@ function App() {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const isSuperAdmin = user?.email === 'kairolopes@gmail.com';
+  const hasFullDataAccess = isSuperAdmin || ['Administrativo', 'Tecnologia'].includes(user?.role || '');
+
+  const visibleSessions = hasFullDataAccess 
+      ? sessions 
+      : sessions.filter(s => s.assigneeId === user?.id);
+
   if (!token) {
     return <Login onLogin={handleLogin} />;
   }
@@ -299,7 +306,7 @@ function App() {
                         </div>
                         {lastUpdated && <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Atualizado às {lastUpdated.toLocaleTimeString()}</span>}
                     </div>
-                    <span className="tag" style={{ fontSize: '13px', padding: '6px 10px' }}>{sessions.length} ativos</span>
+                    <span className="tag" style={{ fontSize: '13px', padding: '6px 10px' }}>{visibleSessions.length} ativos</span>
                 </header>
 
                 {connectionError && (
@@ -308,14 +315,14 @@ function App() {
                     </div>
                 )}
                 
-                {sessions.length === 0 && !connectionError ? (
+                {visibleSessions.length === 0 && !connectionError ? (
                     <div style={{ textAlign: 'center', padding: '80px', color: 'var(--text-secondary)', border: '1px dashed var(--border-subtle)', borderRadius: '8px' }}>
                         <div style={{ fontSize: '32px', marginBottom: '16px' }}>📭</div>
                         Nenhum atendimento ativo no momento.
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '24px' }}>
-                    {sessions.map(session => (
+                    {visibleSessions.map(session => (
                         <SessionCard 
                             key={session.phone}
                             session={session}
@@ -335,12 +342,12 @@ function App() {
             {/* KANBAN TAB */}
             {activeTab === 'kanban' && (
                 <div style={{ height: 'calc(100vh - 48px)' }}>
-                    <KanbanBoard token={token || ''} baseUrl={BASE_URL} users={usersList} />
+                    <KanbanBoard token={token || ''} baseUrl={BASE_URL} users={usersList} currentUser={user} />
                 </div>
             )}
 
             {/* CAMPAIGNS TAB */}
-            {activeTab === 'campaigns' && (
+            {isSuperAdmin && activeTab === 'campaigns' && (
                 <div>
                 <header style={{ marginBottom: '32px' }}>
                     <h1>Campanhas</h1>
@@ -398,7 +405,7 @@ function App() {
             )}
 
             {/* BROADCAST TAB */}
-            {activeTab === 'broadcast' && (
+            {isSuperAdmin && activeTab === 'broadcast' && (
                 <div>
                 <header style={{ marginBottom: '32px' }}>
                     <h1>Broadcast Rápido</h1>
@@ -427,7 +434,7 @@ function App() {
             )}
 
             {/* TEAM TAB */}
-            {activeTab === 'team' && (
+            {isSuperAdmin && activeTab === 'team' && (
                 <div>
                 <header style={{ marginBottom: '32px' }}>
                     <h1>Equipe</h1>

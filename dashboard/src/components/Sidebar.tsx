@@ -3,7 +3,7 @@ import React from 'react';
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: any) => void;
-  user: { name: string; role: string } | null;
+  user: { name: string; role: string; email: string } | null;
   onLogout: () => void;
 }
 
@@ -41,15 +41,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user,
         Quadro CRM
       </div>
       
-      <div className="sidebar-section-title">Gestão</div>
-      <div className={`sidebar-item ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}>
-        <Icons.Users />
-        Equipe
-      </div>
-      <div className={`sidebar-item ${activeTab === 'campaigns' ? 'active' : ''}`} onClick={() => setActiveTab('campaigns')}>
-        <Icons.Home />
-        Campanhas
-      </div>
+      {user?.email === 'kairolopes@gmail.com' && (
+        <>
+          <div className="sidebar-section-title">Gestão</div>
+          <div className={`sidebar-item ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}>
+            <Icons.Users />
+            Equipe
+          </div>
+          <div className={`sidebar-item ${activeTab === 'campaigns' ? 'active' : ''}`} onClick={() => setActiveTab('campaigns')}>
+            <Icons.Home />
+            Campanhas
+          </div>
+        </>
+      )}
 
       <div style={{ flex: 1 }}></div>
 
