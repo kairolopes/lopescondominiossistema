@@ -64,7 +64,7 @@ function App() {
   const [campTag, setCampTag] = useState('');
 
   // User Mgmt Form
-  const [newUser, setNewUser] = useState({ name: '', email: '', department: '', role: 'agent', password: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', department: '', role: 'Comercial', password: '' });
 
   const handleLogin = (token: string, userData: any) => {
     localStorage.setItem('token', token);
