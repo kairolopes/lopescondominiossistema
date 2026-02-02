@@ -45,5 +45,22 @@ export const zapiService = {
             console.error('[Z-API] Error fetching profile picture:', error);
             return undefined;
         }
+    },
+
+    getContactName: async (phone: string): Promise<string | undefined> => {
+        try {
+            // Check if contact exists/get info
+            const url = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/contacts/${phone}`;
+            const res = await axios.get(url, {
+                headers: {
+                    'Client-Token': config.zapi.securityToken
+                }
+            });
+            // Adjust based on actual Z-API response structure for contacts
+            return res.data?.name || res.data?.pushName || undefined;
+        } catch (error) {
+            console.error('[Z-API] Error fetching contact name:', error);
+            return undefined;
+        }
     }
 };

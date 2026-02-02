@@ -125,8 +125,15 @@ router.post('/webhook/antigravity', async (req: Request, res: Response) => {
 
             console.log(`[Antigravity] Extracted - Phone: ${phone}, Name: ${senderName}, Photo: ${!!profilePicUrl}`);
 
-            // If profile pic is missing, we could try to fetch it via Z-API if available, 
-            // but usually Google/Antigravity provides it in the sender object.
+            // If profile pic is missing, try to fetch it via Z-API (proactive fallback)
+            if (!profilePicUrl) {
+                try {
+                    console.log(`[Antigravity] Fetching missing profile picture for ${phone} via Z-API...`);
+                    profilePicUrl = await zapiService.getProfilePicture(phone);
+                } catch (err) {
+                    console.warn('[Antigravity] Failed to fetch profile pic via Z-API:', err);
+                }
+            }
             
             await botFlow.handleMessage(phone, text, senderName, profilePicUrl);
         } else {
