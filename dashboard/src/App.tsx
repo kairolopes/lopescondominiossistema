@@ -28,6 +28,7 @@ interface User {
   email: string;
   role: 'master' | 'agent' | 'admin';
   department?: string;
+  customRole?: string;
 }
 
 const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3006');
@@ -202,12 +203,21 @@ function App() {
     if (!message?.trim()) return;
 
     try {
+        const roleMap: any = {
+            'admin': 'Administrador',
+            'master': 'Master',
+            'agent': 'Agente'
+        };
+        const role = user?.customRole || roleMap[user?.role || 'agent'] || 'Agente';
+        const signature = `*${user?.name || 'Agente'} - ${role}*`;
+        const finalMessage = `${signature}\n${message}`;
+
         await fetchWithAuth(`${API_URL}/messages/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
               phone, 
-              message,
+              message: finalMessage,
               senderName: user?.name || 'Agente'
             })
         });
