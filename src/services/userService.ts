@@ -6,8 +6,7 @@ export interface SystemUser {
   email: string;
   password?: string; // Legacy plaintext
   passwordHash?: string; // Bcrypt hash
-  role: 'Administrativo' | 'Comercial' | 'Contador' | 'Financeiro' | 'Tecnologia';
-  department?: string;
+  role: 'Administrativo' | 'Comercial' | 'Contabilidade' | 'Financeiro' | 'Tecnologia';
 }
 
 export const userService = {

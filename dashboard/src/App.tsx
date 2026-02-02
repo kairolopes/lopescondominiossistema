@@ -31,8 +31,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'Administrativo' | 'Comercial' | 'Contador' | 'Financeiro' | 'Tecnologia';
-  department?: string;
+  role: 'Administrativo' | 'Comercial' | 'Contabilidade' | 'Financeiro' | 'Tecnologia';
   customRole?: string;
 }
 
@@ -64,7 +63,7 @@ function App() {
   const [campTag, setCampTag] = useState('');
 
   // User Mgmt Form
-  const [newUser, setNewUser] = useState({ name: '', email: '', department: '', role: 'Comercial', password: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Comercial', password: '' });
 
   const handleLogin = (token: string, userData: any) => {
     localStorage.setItem('token', token);
@@ -196,7 +195,7 @@ function App() {
             body: JSON.stringify(newUser)
         });
         alert('Usuário criado com sucesso!');
-        setNewUser({ name: '', email: '', department: '', role: 'Comercial', password: '' });
+        setNewUser({ name: '', email: '', role: 'Comercial', password: '' });
         fetchUsers();
     } catch (err) {
         alert('Erro ao criar usuário');
@@ -469,15 +468,10 @@ function App() {
                             >
                                 <option value="Administrativo">Administrativo</option>
                                 <option value="Comercial">Comercial</option>
-                                <option value="Contador">Contador</option>
+                                <option value="Contabilidade">Contabilidade</option>
                                 <option value="Financeiro">Financeiro</option>
                                 <option value="Tecnologia">Tecnologia</option>
                             </select>
-                            <input 
-                                placeholder="Departamento (Ex: Financeiro)" 
-                                value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})}
-                                style={{ background: '#fafafa' }}
-                            />
                             <button type="submit" className="btn btn-primary">Cadastrar</button>
                         </form>
                     </div>

@@ -23,8 +23,7 @@ export const userSeeder = {
                 const userData: SystemUser = {
                     name: u.name,
                     email: u.email,
-                    role: u.role,
-                    department: u.department,
+                    role: u.role as any, // Cast to match new strict types
                     passwordHash: u.passwordHash,
                     // If JSON has 'password' (plaintext), use it too
                     password: u.password 
@@ -39,7 +38,6 @@ export const userSeeder = {
                 name: 'Administrador',
                 email: 'admin@lopes.com.br',
                 role: 'Tecnologia',
-                department: 'Management',
                 password: '123456'
             });
             console.log(`[Seeder] Synced Admin.`);
