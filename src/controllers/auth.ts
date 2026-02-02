@@ -11,10 +11,10 @@ export const authController = {
 
         // Hardcoded admin fallback
         if ((loginId === 'admin' || loginId === 'admin@lopes.com.br') && password === '123456') {
-            const token = jwt.sign({ username: 'admin', role: 'admin', name: 'Administrador' }, SECRET_KEY, { expiresIn: '24h' });
+            const token = jwt.sign({ username: 'admin', role: 'Tecnologia', name: 'Administrador' }, SECRET_KEY, { expiresIn: '24h' });
             return res.json({ 
                 token, 
-                user: { name: 'Administrador', email: 'admin@lopes.com.br', role: 'master', department: 'Diretoria' } 
+                user: { name: 'Administrador', email: 'admin@lopes.com.br', role: 'Tecnologia', department: 'Diretoria' } 
             });
         }
 

@@ -31,7 +31,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'master' | 'agent' | 'admin';
+  role: 'Administrativo' | 'Comercial' | 'Contador' | 'Financeiro' | 'Tecnologia';
   department?: string;
   customRole?: string;
 }
@@ -196,7 +196,7 @@ function App() {
             body: JSON.stringify(newUser)
         });
         alert('Usuário criado com sucesso!');
-        setNewUser({ name: '', email: '', department: '', role: 'agent', password: '' });
+        setNewUser({ name: '', email: '', department: '', role: 'Comercial', password: '' });
         fetchUsers();
     } catch (err) {
         alert('Erro ao criar usuário');
@@ -208,14 +208,8 @@ function App() {
     if (!message?.trim()) return;
 
     try {
-        const roleMap: any = {
-            'admin': 'Administrador',
-            'master': 'Administrador', // Mapear master para Administrador
-            'agent': 'Agente'
-        };
-        const roleKey = user?.role || 'agent';
-        // Se tiver cargo personalizado, usa ele. Se não, tenta mapear o role. Se não tiver no mapa, usa o próprio role ou 'Agente'
-        const role = user?.customRole || roleMap[roleKey] || roleKey;
+        // No mapping needed as roles are now explicit
+        const role = user?.role || 'Comercial';
         
         const userName = user?.name || 'Agente';
         const signature = `*${userName} - ${role}*`;
@@ -466,9 +460,11 @@ function App() {
                                 value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value as any})}
                                 style={{ background: '#fafafa' }}
                             >
-                                <option value="agent">Agente</option>
-                                <option value="admin">Administrador</option>
-                                <option value="master">Master</option>
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="Comercial">Comercial</option>
+                                <option value="Contador">Contador</option>
+                                <option value="Financeiro">Financeiro</option>
+                                <option value="Tecnologia">Tecnologia</option>
                             </select>
                             <input 
                                 placeholder="Departamento (Ex: Financeiro)" 

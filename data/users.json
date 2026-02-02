@@ -4,7 +4,7 @@
     "name": "Kairo Lopes",
     "email": "kairolopes@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "master",
+    "role": "Tecnologia",
     "department": "Tecnologia"
   },
   {
@@ -12,7 +12,7 @@
     "name": "Rafael Oliveira",
     "email": "financeiroservircontabil@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
+    "role": "Contador",
     "department": "Contabilidade"
   },
   {
@@ -20,7 +20,7 @@
     "name": "Priscila Alencar",
     "email": "rhservircontabil@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
+    "role": "Administrativo",
     "department": "Contabilidade"
   },
   {
@@ -28,7 +28,7 @@
     "name": "Micael Gomes",
     "email": "fiscalservircontabil@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
+    "role": "Contador",
     "department": "Contabilidade"
   },
   {
@@ -36,7 +36,7 @@
     "name": "Adiel Macedo",
     "email": "adielcm@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
+    "role": "Contador",
     "department": "Contabilidade"
   },
   {
@@ -44,7 +44,7 @@
     "name": "Paolla Santiago",
     "email": "paollasantiago15@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
+    "role": "Financeiro",
     "department": "Financeiro"
   },
   {
@@ -52,7 +52,7 @@
     "name": "Gabrielle Fernandes",
     "email": "gabbyy.fernandes0@gmail.com",
     "department": "Financeiro",
-    "role": "user",
+    "role": "Financeiro",
     "passwordHash": "$2b$10$4OvwuAbiIdCfIpxPlksCqusSDbWIzMTQA.JTxTygrmSKJlfu.OB52"
   }
 ]

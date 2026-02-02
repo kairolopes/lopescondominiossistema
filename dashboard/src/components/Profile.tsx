@@ -4,7 +4,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'master' | 'agent' | 'admin';
+  role: 'Administrativo' | 'Comercial' | 'Contador' | 'Financeiro' | 'Tecnologia';
   department?: string;
   customRole?: string; // For the new requested roles
 }
@@ -15,9 +15,9 @@ interface ProfileProps {
 }
 
 const ROLES = [
-  'Administrador',
+  'Administrativo',
   'Comercial',
-  'Contabilidade',
+  'Contador',
   'Financeiro',
   'Tecnologia'
 ];
@@ -34,9 +34,9 @@ export const Profile: React.FC<ProfileProps> = ({ user, onUpdateUser }) => {
       setEmail(user.email || '');
       // Map internal roles to display roles if needed, or use stored custom role
       if (user.email === 'admin@lopes.com.br') {
-        setSelectedRole('Administrador');
+        setSelectedRole('Tecnologia');
       } else {
-        setSelectedRole(user.customRole || ROLES[0]);
+        setSelectedRole(user.role || ROLES[1]); // Default to Comercial
       }
     }
   }, [user]);
