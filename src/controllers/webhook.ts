@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { botFlow } from '../bot/flow';
+import { zapiService } from '../services/zapi';
 
 const router = express.Router();
 
@@ -12,7 +13,17 @@ router.post('/webhook/zapi', async (req: Request, res: Response) => {
         if (phone && text) {
              const messageContent = typeof text === 'object' ? text.message : text;
              const safeSenderName = senderName || 'Cliente WhatsApp';
-             const safeProfilePicUrl = senderPhoto || photo || photoUrl || undefined;
+             let safeProfilePicUrl = senderPhoto || photo || photoUrl || undefined;
+
+             // Attempt to fetch profile picture if missing (proactive fix)
+             if (!safeProfilePicUrl) {
+                 try {
+                     console.log(`[Webhook Z-API] Fetching profile picture for ${phone}...`);
+                     safeProfilePicUrl = await zapiService.getProfilePicture(phone);
+                 } catch (err) {
+                     console.warn('[Webhook Z-API] Failed to fetch profile pic:', err);
+                 }
+             }
 
              // Async processing
              botFlow.handleMessage(phone, messageContent, safeSenderName, safeProfilePicUrl).catch(console.error);

@@ -28,5 +28,22 @@ export const zapiService = {
         } catch (error) {
             console.error('Z-API Error:', error);
         }
+    },
+
+    getProfilePicture: async (phone: string): Promise<string | undefined> => {
+        try {
+            const url = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/profile-picture`;
+            const res = await axios.get(url, {
+                params: { phone },
+                headers: {
+                    'Client-Token': config.zapi.securityToken
+                }
+            });
+            // Z-API usually returns { link: "url" }
+            return res.data?.link || res.data?.url || undefined;
+        } catch (error) {
+            console.error('[Z-API] Error fetching profile picture:', error);
+            return undefined;
+        }
     }
 };
