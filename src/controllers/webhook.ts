@@ -100,19 +100,39 @@ router.post('/webhook/antigravity', async (req: Request, res: Response) => {
     try {
         console.log('[Antigravity Webhook] Payload:', JSON.stringify(req.body, null, 2));
         
-        // Google Antigravity (wrapping Meta API) often uses 'messages' array
-        // or a custom agent event format. 
-        // We'll log it first to understand the structure during integration.
+        // Handle Google Business Messages / Antigravity payload structure
+        // Often follows: { conversationId, message: { text: "..." }, sender: { displayName: "...", avatarUrl: "..." } }
         
-        // Placeholder logic assuming a standard structure (to be refined)
         const { conversationId, message, sender } = req.body;
         
         if (conversationId && message) {
             // Normalize phone number from conversationId (often 'whatsapp:+55...')
             const phone = conversationId.replace('whatsapp:', '').replace('+', '');
-            const text = message.text || message;
+            const text = typeof message === 'string' ? message : (message.text || JSON.stringify(message));
             
-            await botFlow.handleMessage(phone, text, sender || 'User');
+            // Extract sender info safely
+            let senderName = 'Cliente WhatsApp';
+            let profilePicUrl: string | undefined = undefined;
+
+            if (sender) {
+                if (typeof sender === 'string') {
+                    senderName = sender;
+                } else if (typeof sender === 'object') {
+                    senderName = sender.displayName || sender.name || senderName;
+                    profilePicUrl = sender.avatarUrl || sender.photoUrl || sender.profilePicUrl || undefined;
+                }
+            }
+
+            console.log(`[Antigravity] Extracted - Phone: ${phone}, Name: ${senderName}, Photo: ${!!profilePicUrl}`);
+
+            // If profile pic is missing, we could try to fetch it via Z-API if available, 
+            // but usually Google/Antigravity provides it in the sender object.
+            
+            await botFlow.handleMessage(phone, text, senderName, profilePicUrl);
+        } else {
+             // Fallback for other formats (e.g. Dialogflow wrapping)
+             console.warn('[Antigravity Webhook] Unknown payload format, checking alternatives...');
+             // Add logic here if payload is different (e.g. req.body.queryResult...)
         }
 
         res.status(200).json({ status: 'received' });
