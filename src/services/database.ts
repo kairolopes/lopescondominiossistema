@@ -68,5 +68,16 @@ export const databaseService = {
             return;
         }
         await db.collection('sessions').doc(phone).set(data, { merge: true });
+    },
+
+    getAllConversations: async () => {
+        if (!db) return [];
+        try {
+            const snapshot = await db.collection('conversations').get();
+            return snapshot.docs.map(doc => ({ phone: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('[Database] Error getting all conversations:', error);
+            return [];
+        }
     }
 };
