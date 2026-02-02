@@ -22,8 +22,7 @@ const seedAdmin = async () => {
                 name: 'Administrador',
                 email: email,
                 password: password,
-                role: 'Tecnologia',
-                department: 'Management'
+                role: 'Tecnologia'
             });
             console.log('Admin user created successfully.');
         }
@@ -39,8 +38,7 @@ const seedAdmin = async () => {
                 name: 'Kairo Lopes',
                 email: kairoEmail,
                 password: password,
-                role: 'Tecnologia',
-                department: 'Diretoria'
+                role: 'Tecnologia'
             });
             console.log('Kairo user created successfully.');
         }

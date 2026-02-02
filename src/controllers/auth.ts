@@ -15,7 +15,7 @@ export const authController = {
             const token = jwt.sign({ username: 'admin', role: 'Tecnologia', name: 'Administrador' }, SECRET_KEY, { expiresIn: '24h' });
             return res.json({ 
                 token, 
-                user: { name: 'Administrador', email: 'admin@lopes.com.br', role: 'Tecnologia', department: 'Diretoria' } 
+                user: { name: 'Administrador', email: 'admin@lopes.com.br', role: 'Tecnologia' } 
             });
         }
 
@@ -24,7 +24,7 @@ export const authController = {
             const token = jwt.sign({ username: 'kairolopes@gmail.com', role: 'Tecnologia', name: 'Kairo Lopes' }, SECRET_KEY, { expiresIn: '24h' });
             return res.json({ 
                 token, 
-                user: { name: 'Kairo Lopes', email: 'kairolopes@gmail.com', role: 'Tecnologia', department: 'Diretoria' } 
+                user: { name: 'Kairo Lopes', email: 'kairolopes@gmail.com', role: 'Tecnologia' } 
             });
         }
 
@@ -73,9 +73,9 @@ export const authController = {
 
     async createUser(req: Request, res: Response) {
         try {
-            const { name, email, password, role, department } = req.body;
+            const { name, email, password, role } = req.body;
             const newUser = await userService.createSystemUser({
-                name, email, password, role, department
+                name, email, password, role
             });
             res.status(201).json(newUser);
         } catch (error: any) {

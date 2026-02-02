@@ -24,7 +24,7 @@ export const userService = {
     if (!existing.empty) {
         // Update existing user to ensure latest data (like roles/password)
         const docId = existing.docs[0].id;
-        await db.collection('users').doc(docId).update(data);
+        await db.collection('users').doc(docId).update(data as any);
         return { id: docId, ...data };
     }
     
