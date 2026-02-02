@@ -3,7 +3,7 @@ import { db } from '../config/firebase';
 interface Session {
     phone: string;
     name: string;
-    photoUrl?: string; // WhatsApp profile picture
+    profilePicUrl?: string; // WhatsApp profile picture
     state: string;
     lastActivity: Date;
     pausedAt?: Date; // New field to track pause start time
@@ -15,7 +15,7 @@ const sessions: Map<string, Session> = new Map();
 export const sessionManager = {
     getSession: (phone: string) => sessions.get(phone),
     
-    ensureSession: async (phone: string, name: string, photoUrl?: string) => {
+    ensureSession: async (phone: string, name: string, profilePicUrl?: string) => {
         // 1. Check Memory
         if (sessions.has(phone)) {
             const session = sessions.get(phone)!;
@@ -26,8 +26,8 @@ export const sessionManager = {
                 session.name = name;
                 updated = true;
             }
-            if (photoUrl && session.photoUrl !== photoUrl) {
-                session.photoUrl = photoUrl;
+            if (profilePicUrl && session.profilePicUrl !== profilePicUrl) {
+                session.profilePicUrl = profilePicUrl;
                 updated = true;
             }
 
@@ -35,7 +35,7 @@ export const sessionManager = {
             if (updated && db) {
                  await db.collection('conversations').doc(phone).set({ 
                     senderName: session.name,
-                    photoUrl: session.photoUrl
+                    profilePicUrl: session.profilePicUrl
                 }, { merge: true });
             }
 
