@@ -11,7 +11,19 @@ async function testZapiProfile() {
     console.log(`Testing Z-API Profile Fetch for ${phone}...`);
     
     try {
-        const photoUrl = await zapiService.getProfilePicture(phone);
+        // 3. Test Phone-Exists Endpoint
+                console.log('--- Testing /phone-exists Endpoint ---');
+                const existsUrl = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/phone-exists/${phone}`;
+                try {
+                    const existsRes = await axios.get(existsUrl, {
+                        headers: { 'Client-Token': config.zapi.securityToken }
+                    });
+                    console.log('RAW Phone-Exists Response:', JSON.stringify(existsRes.data, null, 2));
+                } catch (e: any) {
+                    console.error('Phone-Exists Endpoint Error:', e.response?.data || e.message);
+                }
+
+                const photoUrl = await zapiService.getProfilePicture(phone);
         if (photoUrl) {
             console.log('SUCCESS! Found photo URL:', photoUrl);
         } else {
@@ -24,8 +36,20 @@ async function testZapiProfile() {
                 } else {
                     console.log('FAILED: No name returned (undefined).');
                     
-                    // Try alternative: Fetch Chats
-                    console.log('Attempting to find name in active chats...');
+                    // 1. Test Contacts Endpoint RAW
+                    console.log('--- Testing /contacts/{phone} Endpoint ---');
+                    const contactUrl = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/contacts/${phone}`;
+                    try {
+                        const contactRes = await axios.get(contactUrl, {
+                            headers: { 'Client-Token': config.zapi.securityToken }
+                        });
+                        console.log('RAW Contacts Response:', JSON.stringify(contactRes.data, null, 2));
+                    } catch (e: any) {
+                        console.error('Contacts Endpoint Error:', e.response?.data || e.message);
+                    }
+
+                    // 2. Test Chats Endpoint
+                    console.log('--- Testing /chats Endpoint ---');
                     try {
                         const chatsUrl = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/chats`;
                         const chatsRes = await axios.get(chatsUrl, {

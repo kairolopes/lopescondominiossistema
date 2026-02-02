@@ -10,6 +10,15 @@ export interface Message {
     senderName?: string;
 }
 
+export interface ConversationData {
+    phone: string;
+    senderName?: string;
+    profilePicUrl?: string;
+    lastMessage?: string;
+    lastActivity?: any;
+    [key: string]: any;
+}
+
 export const databaseService = {
     saveMessage: async (message: Message) => {
         if (!db) {
@@ -70,11 +79,11 @@ export const databaseService = {
         await db.collection('sessions').doc(phone).set(data, { merge: true });
     },
 
-    getAllConversations: async () => {
+    getAllConversations: async (): Promise<ConversationData[]> => {
         if (!db) return [];
         try {
             const snapshot = await db.collection('conversations').get();
-            return snapshot.docs.map(doc => ({ phone: doc.id, ...doc.data() }));
+            return snapshot.docs.map(doc => ({ phone: doc.id, ...doc.data() } as ConversationData));
         } catch (error) {
             console.error('[Database] Error getting all conversations:', error);
             return [];
