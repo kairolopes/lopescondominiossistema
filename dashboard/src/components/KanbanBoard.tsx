@@ -136,6 +136,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ token, baseUrl, users,
     }
   };
 
+  const isSuperAdmin = currentUser?.email === 'kairolopes@gmail.com';
+  const hasFullDataAccess = isSuperAdmin || ['Administrativo', 'Tecnologia'].includes(currentUser?.role || '');
+
+  const visibleTickets = hasFullDataAccess 
+    ? tickets 
+    : tickets.filter(t => t.assigneeId === currentUser?.id);
+
   return (
     <div style={{ padding: '20px', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
       <div className="flex justify-between items-center" style={{ marginBottom: '24px' }}>
