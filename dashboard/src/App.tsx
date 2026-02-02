@@ -205,11 +205,15 @@ function App() {
     try {
         const roleMap: any = {
             'admin': 'Administrador',
-            'master': 'Master',
+            'master': 'Administrador', // Mapear master para Administrador
             'agent': 'Agente'
         };
-        const role = user?.customRole || roleMap[user?.role || 'agent'] || 'Agente';
-        const signature = `*${user?.name || 'Agente'} - ${role}*`;
+        const roleKey = user?.role || 'agent';
+        // Se tiver cargo personalizado, usa ele. Se não, tenta mapear o role. Se não tiver no mapa, usa o próprio role ou 'Agente'
+        const role = user?.customRole || roleMap[roleKey] || roleKey;
+        
+        const userName = user?.name || 'Agente';
+        const signature = `*${userName} - ${role}*`;
         const finalMessage = `${signature}\n${message}`;
 
         await fetchWithAuth(`${API_URL}/messages/send`, {
@@ -218,7 +222,7 @@ function App() {
             body: JSON.stringify({ 
               phone, 
               message: finalMessage,
-              senderName: user?.name || 'Agente'
+              senderName: userName
             })
         });
         setReplyText(prev => ({ ...prev, [phone]: '' }));
