@@ -43,11 +43,7 @@ export const adminController = {
             const { phone } = req.params;
             const { status } = req.body; // 'active' | 'paused'
             
-            if (!db) {
-                console.warn('Database not initialized. Update session in memory only.');
-                sessionManager.updateState(phone, status === 'paused' ? 'PAUSED' : 'IDLE');
-                return res.json({ success: true, status, warning: 'local_mode_only' });
-            }
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
 
             // Update Firestore
             await db.collection('conversations').doc(phone).set({ 
@@ -75,10 +71,7 @@ export const adminController = {
             const { phone } = req.params;
             const { assigneeId } = req.body;
             
-            if (!db) {
-                console.warn('Database not initialized. Assign session ignored.');
-                return res.json({ success: true, assigneeId, warning: 'local_mode_only' });
-            }
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
 
             await db.collection('conversations').doc(phone).set({ 
                 assigneeId: assigneeId
@@ -93,9 +86,7 @@ export const adminController = {
 
     async getConversations(req: Request, res: Response) {
         try {
-            if (!db) {
-                return res.json([]); // Return empty list instead of error
-            }
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
             
             const snapshot = await db.collection('conversations').orderBy('lastActivity', 'desc').get();
             const conversations = snapshot.docs.map(doc => doc.data());
@@ -108,21 +99,7 @@ export const adminController = {
 
     async getSessions(req: Request, res: Response) {
         try {
-            if (!db) {
-                 return res.json([{
-                    phone: '5511999999999',
-                    step: 'active',
-                    tags: ['demo_local'],
-                    status: 'active',
-                    assigneeId: null,
-                    history: [{
-                        role: 'bot',
-                        content: 'Sistema rodando em modo local (sem banco de dados).',
-                        timestamp: new Date().toISOString(),
-                        senderName: 'System'
-                    }]
-                 }]); 
-            }
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
             const firestore = db;
 
             const snapshot = await firestore.collection('conversations').orderBy('lastActivity', 'desc').limit(20).get();
@@ -173,9 +150,7 @@ export const adminController = {
 
     async getMessages(req: Request, res: Response) {
         try {
-            if (!db) {
-                 return res.json([]); 
-            }
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
             
             const { phone } = req.params;
             const snapshot = await db.collection('conversations')

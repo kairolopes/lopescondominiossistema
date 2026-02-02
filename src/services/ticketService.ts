@@ -15,10 +15,7 @@ export interface Ticket {
 
 export const ticketService = {
   async create(data: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt'>) {
-    if (!db) {
-        console.warn('Database not initialized. Ticket created in memory (temporary).');
-        return { id: 'temp_' + Date.now(), ...data, createdAt: new Date(), updatedAt: new Date() };
-    }
+    if (!db) throw new Error('Database not initialized');
     
     const ticketData = {
       ...data,
@@ -31,9 +28,7 @@ export const ticketService = {
   },
 
   async getAll() {
-    if (!db) {
-        return []; // Return empty list for local mode
-    }
+    if (!db) throw new Error('Database not initialized');
     
     const snapshot = await db.collection('tickets').orderBy('updatedAt', 'desc').get();
     return snapshot.docs.map(doc => {
@@ -48,17 +43,14 @@ export const ticketService = {
   },
 
   async getByStatus(status: string) {
-    if (!db) return [];
+    if (!db) throw new Error('Database not initialized');
     
     const snapshot = await db.collection('tickets').where('status', '==', status).get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   },
 
   async update(id: string, data: Partial<Ticket>) {
-    if (!db) {
-         console.warn('Database not initialized. Ticket update ignored.');
-         return { id, ...data };
-    }
+    if (!db) throw new Error('Database not initialized');
     
     const updateData = {
       ...data,
@@ -70,7 +62,7 @@ export const ticketService = {
   },
   
   async delete(id: string) {
-      if (!db) return { id };
+      if (!db) throw new Error('Database not initialized');
       await db.collection('tickets').doc(id).delete();
       return { id };
   }

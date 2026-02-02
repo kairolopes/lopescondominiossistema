@@ -13,8 +13,8 @@ export interface Message {
 export const databaseService = {
     saveMessage: async (message: Message) => {
         if (!db) {
-            console.warn('[Database] Database not initialized. Message NOT saved to persistence layer, but flow will continue.');
-            return; // Return gracefully so the bot can still reply
+            console.error('[Database] Failed to save message: Database not initialized (Missing credentials?)');
+            return;
         }
 
         try {
@@ -55,7 +55,7 @@ export const databaseService = {
 
     getSession: async (phone: string) => {
         if (!db) {
-            // Return null silently for local mode fallback
+            console.error('[Database] Failed to get session: Database not initialized');
             return null;
         }
         const doc = await db.collection('sessions').doc(phone).get();
@@ -64,7 +64,7 @@ export const databaseService = {
 
     saveSession: async (phone: string, data: any) => {
         if (!db) {
-             // Silently ignore for local mode
+            console.error('[Database] Failed to save session: Database not initialized');
             return;
         }
         await db.collection('sessions').doc(phone).set(data, { merge: true });
