@@ -143,6 +143,8 @@ export const adminController = {
                     tags: ['whatsapp'], 
                     status: data.status || 'active',
                     assigneeId: data.assigneeId || null,
+                    senderName: data.senderName, // Pass senderName to frontend
+                    profilePicUrl: data.profilePicUrl, // Pass profilePicUrl to frontend
                     history: history // ordered asc (oldest first) after reverse
                 };
             }));
