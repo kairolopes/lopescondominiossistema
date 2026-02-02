@@ -6,8 +6,8 @@ import { sessionManager } from '../services/sessionManager';
 import { databaseService } from '../services/database';
 import { zapiService } from '../services/zapi';
 
-const AI_SIGNATURE = '*Penélope - Secretária Virtual*\n';
-const AI_NAME = 'Penélope';
+const AI_SIGNATURE = '*Lopes Condomínios - Assistente Virtual*\n';
+const AI_NAME = 'Lopes Condomínios';
 
 export const botFlow = {
   handleMessage: async (phone: string, message: string, senderName: string, profilePicUrl?: string) => {
