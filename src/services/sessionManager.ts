@@ -20,12 +20,27 @@ export const sessionManager = {
         if (sessions.has(phone)) {
             const session = sessions.get(phone)!;
             
-            // Update profile info if changed
+                    // Update profile info if changed
             let updated = false;
+            
+            // Logic to update name:
+            // 1. If new name is provided AND different from current
+            // 2. If new name is NOT 'Cliente WhatsApp' (default fallback) - we prefer specific names
+            // 3. OR if current name IS 'Cliente WhatsApp' and new name is 'Cliente WhatsApp' (no change) or new name is better.
+            // Actually, if new name is 'Cliente WhatsApp', we only update if current name is empty.
+            
             if (name && session.name !== name) {
-                session.name = name;
-                updated = true;
+                if (name !== 'Cliente WhatsApp' && name !== 'Unknown') {
+                    // Always update if we have a real name
+                    session.name = name;
+                    updated = true;
+                } else if (!session.name || session.name === 'Unknown') {
+                    // Update to default only if we have nothing
+                    session.name = name;
+                    updated = true;
+                }
             }
+
             if (profilePicUrl && session.profilePicUrl !== profilePicUrl) {
                 session.profilePicUrl = profilePicUrl;
                 updated = true;
@@ -33,7 +48,7 @@ export const sessionManager = {
 
             // Sync updates to DB
             if (updated && db) {
-                 await db.collection('conversations').doc(phone).set({ 
+                await db.collection('conversations').doc(phone).set({ 
                     senderName: session.name,
                     profilePicUrl: session.profilePicUrl
                 }, { merge: true });
@@ -108,10 +123,24 @@ export const sessionManager = {
                         }
                     }
 
+                    // Determine Name and Photo (Prefer fresh webhook data if valid)
+                    let resolvedName = data?.senderName || name;
+                    let resolvedProfilePic = data?.profilePicUrl || profilePicUrl;
+
+                    // Override DB name if webhook provides a specific name (not default)
+                    if (name && name !== 'Cliente WhatsApp' && name !== 'Unknown') {
+                         resolvedName = name;
+                    }
+                    
+                    // Override DB photo if webhook provides one
+                    if (profilePicUrl) {
+                        resolvedProfilePic = profilePicUrl;
+                    }
+
                     const session: Session = {
                         phone,
-                        name: data?.senderName || name,
-                        profilePicUrl: data?.profilePicUrl || profilePicUrl,
+                        name: resolvedName,
+                        profilePicUrl: resolvedProfilePic,
                         state,
                         lastActivity: data?.lastActivity?.toDate ? data.lastActivity.toDate() : new Date(),
                         pausedAt,
@@ -120,10 +149,10 @@ export const sessionManager = {
                     sessions.set(phone, session);
                     
                     // Update DB if info changed
-                    if ((name && data?.senderName !== name) || (profilePicUrl && data?.profilePicUrl !== profilePicUrl)) {
+                    if ((resolvedName && data?.senderName !== resolvedName) || (resolvedProfilePic && data?.profilePicUrl !== resolvedProfilePic)) {
                          await db.collection('conversations').doc(phone).set({ 
-                            senderName: name,
-                            profilePicUrl: profilePicUrl
+                            senderName: resolvedName,
+                            profilePicUrl: resolvedProfilePic
                         }, { merge: true });
                     }
 
