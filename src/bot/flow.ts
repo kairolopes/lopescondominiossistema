@@ -35,24 +35,47 @@ export const botFlow = {
           return;
       }
 
-      // Hidden Command: Force Sync Profile Pictures
+      // Hidden Command: Force Sync Profile Pictures and Names
       if (cleanMsg === '#sync_profiles') {
           await whatsappService.sendText(phone, `${AI_SIGNATURE}🔄 Iniciando atualização de perfis (fotos/nomes)...`, 'assistant', AI_NAME);
           
           const allDocs = await databaseService.getAllConversations();
           let count = 0;
           for (const doc of allDocs) {
-              // Only update if missing photo
-              if (!doc.profilePicUrl && doc.phone) {
+              if (!doc.phone) continue;
+
+              let updated = false;
+              const updates: any = {};
+
+              // 1. Sync Photo if missing
+              if (!doc.profilePicUrl) {
                   try {
                       const pic = await zapiService.getProfilePicture(doc.phone);
                       if (pic) {
-                          await databaseService.saveSession(doc.phone, { profilePicUrl: pic });
-                          count++;
+                          updates.profilePicUrl = pic;
+                          updated = true;
                       }
                   } catch (e) {
-                      console.error(`Failed to sync profile for ${doc.phone}`, e);
+                      console.error(`Failed to sync profile pic for ${doc.phone}`, e);
                   }
+              }
+
+              // 2. Sync Name if missing or default
+              if (!doc.senderName || doc.senderName === 'Cliente WhatsApp') {
+                  try {
+                      const name = await zapiService.getContactName(doc.phone);
+                      if (name) {
+                          updates.senderName = name;
+                          updated = true;
+                      }
+                  } catch (e) {
+                      console.error(`Failed to sync contact name for ${doc.phone}`, e);
+                  }
+              }
+
+              if (updated) {
+                  await databaseService.saveSession(doc.phone, updates);
+                  count++;
               }
           }
           await whatsappService.sendText(phone, `${AI_SIGNATURE}✅ Atualização concluída! ${count} perfis atualizados.`, 'assistant', AI_NAME);
