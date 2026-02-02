@@ -26,7 +26,20 @@ interface ChatHeaderProps {
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onTogglePause, onAssign }) => {
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
+  const [selectedAssignee, setSelectedAssignee] = useState(session.assigneeId || '');
+  const [isTransferring, setIsTransferring] = useState(false);
 
+  useEffect(() => {
+    setSelectedAssignee(session.assigneeId || '');
+  }, [session.assigneeId]);
+
+  const handleTransfer = async () => {
+    if (selectedAssignee && selectedAssignee !== session.assigneeId) {
+        setIsTransferring(true);
+        await onAssign(session.phone, selectedAssignee);
+        setIsTransferring(false);
+    }
+  };
   useEffect(() => {
     if (session.status === 'paused' && session.pausedAt) {
       const interval = setInterval(() => {
@@ -38,7 +51,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
 
         if (remaining <= 0) {
           setTimeLeft('Retornando...');
-          // Optionally trigger auto-resume here if frontend-driven, but backend handles it too
         } else {
           const minutes = Math.floor(remaining / 60000);
           const seconds = Math.floor((remaining % 60000) / 1000);
@@ -197,8 +209,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap' }}>Transferir:</span>
           <select
-            value={session.assigneeId || ''}
-            onChange={(e) => onAssign(session.phone, e.target.value)}
+            value={selectedAssignee}
+            onChange={(e) => setSelectedAssignee(e.target.value)}
             style={{
               padding: '6px 8px',
               borderRadius: '6px',
@@ -218,6 +230,25 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
               </option>
             ))}
           </select>
+          {selectedAssignee && selectedAssignee !== session.assigneeId && (
+            <button
+                onClick={handleTransfer}
+                disabled={isTransferring}
+                style={{
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    backgroundColor: '#2563eb',
+                    color: 'white',
+                    border: 'none',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    opacity: isTransferring ? 0.7 : 1
+                }}
+            >
+                {isTransferring ? '...' : 'Enviar'}
+            </button>
+          )}
         </div>
       </div>
     </div>
