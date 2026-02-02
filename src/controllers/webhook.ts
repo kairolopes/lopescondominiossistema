@@ -14,8 +14,21 @@ router.post('/webhook/zapi', async (req: Request, res: Response) => {
         if (phone && text) {
              const messageContent = typeof text === 'object' ? text.message : text;
              // Prioritize senderName, then pushName
-             const safeSenderName = senderName || pushName || 'Cliente WhatsApp';
+             let safeSenderName = senderName || pushName;
              let safeProfilePicUrl = senderPhoto || photo || photoUrl || undefined;
+
+             // Attempt to fetch name if missing (proactive fix)
+             if (!safeSenderName) {
+                 try {
+                     console.log(`[Webhook Z-API] Fetching contact name for ${phone}...`);
+                     safeSenderName = await zapiService.getContactName(phone);
+                 } catch (err) {
+                     console.warn('[Webhook Z-API] Failed to fetch contact name:', err);
+                 }
+             }
+             
+             // Final fallback
+             safeSenderName = safeSenderName || 'Cliente WhatsApp';
 
              // Attempt to fetch profile picture if missing (proactive fix)
              if (!safeProfilePicUrl) {
@@ -113,17 +126,29 @@ router.post('/webhook/antigravity', async (req: Request, res: Response) => {
             const text = typeof message === 'string' ? message : (message.text || JSON.stringify(message));
             
             // Extract sender info safely
-            let senderName = 'Cliente WhatsApp';
+            let senderName: string | undefined = undefined;
             let profilePicUrl: string | undefined = undefined;
 
             if (sender) {
                 if (typeof sender === 'string') {
                     senderName = sender;
                 } else if (typeof sender === 'object') {
-                    senderName = sender.displayName || sender.name || senderName;
+                    senderName = sender.displayName || sender.name || undefined;
                     profilePicUrl = sender.avatarUrl || sender.photoUrl || sender.profilePicUrl || undefined;
                 }
             }
+
+            // Proactive fallback for name
+            if (!senderName) {
+                 try {
+                     console.log(`[Antigravity] Fetching missing name for ${phone} via Z-API...`);
+                     senderName = await zapiService.getContactName(phone);
+                 } catch (err) {
+                     console.warn('[Antigravity] Failed to fetch name via Z-API:', err);
+                 }
+            }
+
+            senderName = senderName || 'Cliente WhatsApp';
 
             console.log(`[Antigravity] Extracted - Phone: ${phone}, Name: ${senderName}, Photo: ${!!profilePicUrl}`);
 

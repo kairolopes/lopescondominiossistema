@@ -49,15 +49,30 @@ export const zapiService = {
 
     getContactName: async (phone: string): Promise<string | undefined> => {
         try {
-            // Check if contact exists/get info
-            const url = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/contacts/${phone}`;
-            const res = await axios.get(url, {
-                headers: {
-                    'Client-Token': config.zapi.securityToken
-                }
+            // 1. Try contacts endpoint
+            const contactUrl = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/contacts/${phone}`;
+            const contactRes = await axios.get(contactUrl, {
+                headers: { 'Client-Token': config.zapi.securityToken }
             });
-            // Adjust based on actual Z-API response structure for contacts
-            return res.data?.name || res.data?.pushName || undefined;
+            
+            if (contactRes.data?.name || contactRes.data?.pushName) {
+                return contactRes.data.name || contactRes.data.pushName;
+            }
+
+            // 2. Fallback: Try active chats
+            const chatsUrl = `https://api.z-api.io/instances/${config.zapi.instanceId}/token/${config.zapi.token}/chats`;
+            const chatsRes = await axios.get(chatsUrl, {
+                headers: { 'Client-Token': config.zapi.securityToken }
+            });
+
+            // Find chat by phone (Z-API phone format usually matches, or check id)
+            const chat = chatsRes.data.find((c: any) => c.phone === phone || c.id?.startsWith(phone));
+            
+            if (chat && (chat.name || chat.pushName)) {
+                return chat.name || chat.pushName;
+            }
+
+            return undefined;
         } catch (error) {
             console.error('[Z-API] Error fetching contact name:', error);
             return undefined;
