@@ -63,20 +63,22 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
 
   return (
     <div style={{
-      padding: '16px 24px',
+      padding: '16px 20px',
       borderBottom: '1px solid #e5e7eb',
       backgroundColor: '#ffffff',
       display: 'flex',
+      flexWrap: 'wrap', // Allow wrapping
       justifyContent: 'space-between',
       alignItems: 'center',
+      gap: '12px', // Add gap for wrapped items
       boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
     }}>
       {/* LEFT: User Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '200px' }}>
         {/* Avatar */}
         <div style={{
-          width: '48px',
-          height: '48px',
+          width: '40px', // Slightly smaller
+          height: '40px',
           borderRadius: '50%',
           backgroundColor: '#f3f4f6',
           display: 'flex',
@@ -84,34 +86,36 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
           justifyContent: 'center',
           overflow: 'hidden',
           border: '2px solid #fff',
-          boxShadow: '0 0 0 1px #e5e7eb'
+          boxShadow: '0 0 0 1px #e5e7eb',
+          flexShrink: 0 // Prevent shrinking
         }}>
           {session.profilePicUrl ? (
             <img src={session.profilePicUrl} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <span style={{ fontSize: '18px', fontWeight: 600, color: '#6b7280' }}>
+            <span style={{ fontSize: '16px', fontWeight: 600, color: '#6b7280' }}>
               {getInitials(displayName)}
             </span>
           )}
         </div>
 
         {/* Name & Phone */}
-        <div>
-          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#111827' }}>
+        <div style={{ minWidth: 0 }}> {/* Allow text truncation */}
+          <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {displayName}
           </h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: '#6b7280' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
               {session.phone}
             </span>
             {/* Status Badge */}
             <span style={{
-              fontSize: '11px',
-              padding: '2px 8px',
+              fontSize: '10px',
+              padding: '2px 6px',
               borderRadius: '999px',
               backgroundColor: session.status === 'paused' ? '#fff7ed' : '#ecfdf5',
               color: session.status === 'paused' ? '#c2410c' : '#047857',
-              border: `1px solid ${session.status === 'paused' ? '#ffedd5' : '#a7f3d0'}`
+              border: `1px solid ${session.status === 'paused' ? '#ffedd5' : '#a7f3d0'}`,
+              whiteSpace: 'nowrap'
             }}>
               {session.status === 'paused' ? 'IA Pausada' : 'IA Ativa'}
             </span>
@@ -120,76 +124,78 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
       </div>
 
       {/* RIGHT: Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
         
         {/* Pause Button */}
         {session.status === 'paused' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {timeLeft && (
-              <span style={{ fontSize: '13px', color: '#c2410c', fontWeight: 500 }}>
-                Retorna em {timeLeft}
+              <span style={{ fontSize: '12px', color: '#c2410c', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                Volta em {timeLeft}
               </span>
             )}
             <button
               onClick={() => onTogglePause(session.phone, 'paused')} // Toggle back to active
               style={{
-                padding: '8px 16px',
+                padding: '6px 12px',
                 borderRadius: '6px',
                 backgroundColor: '#fff',
                 border: '1px solid #e5e7eb',
                 color: '#374151',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 500,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap'
               }}
             >
-              Retomar Agora
+              Retomar
             </button>
           </div>
         ) : (
           <button
             onClick={() => onTogglePause(session.phone, 'active', 20)} // Pause for 20m
             style={{
-              padding: '8px 16px',
+              padding: '6px 12px',
               borderRadius: '6px',
               backgroundColor: '#fff7ed',
               border: '1px solid #ffedd5',
               color: '#c2410c',
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: 500,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '4px',
+              whiteSpace: 'nowrap'
             }}
           >
-            <span>⏸️</span> Pausar IA (20m)
+            <span>⏸️</span> Pausar (20m)
           </button>
         )}
 
-        {/* Divider */}
-        <div style={{ width: '1px', height: '24px', backgroundColor: '#e5e7eb' }} />
+        {/* Divider - Hide on small screens if wrapped */}
+        <div style={{ width: '1px', height: '20px', backgroundColor: '#e5e7eb', display: 'none' }} className="hidden md:block" />
 
         {/* Transfer Dropdown */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '13px', color: '#6b7280' }}>Transferir para:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap' }}>Transferir:</span>
           <select
             value={session.assigneeId || ''}
             onChange={(e) => onAssign(session.phone, e.target.value)}
             style={{
-              padding: '8px 12px',
+              padding: '6px 8px',
               borderRadius: '6px',
               border: '1px solid #e5e7eb',
-              fontSize: '13px',
+              fontSize: '12px',
               color: '#374151',
               backgroundColor: '#fff',
               cursor: 'pointer',
               outline: 'none',
-              minWidth: '140px'
+              maxWidth: '120px' // Limit width
             }}
           >
-            <option value="">-- Escolher --</option>
+            <option value="">--</option>
             {users.map(u => (
               <option key={u.id} value={u.id}>
                 {u.name}
