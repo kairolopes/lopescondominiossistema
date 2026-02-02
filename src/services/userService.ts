@@ -4,7 +4,8 @@ export interface SystemUser {
   id?: string;
   name: string;
   email: string;
-  password?: string; // In a real app, hash this!
+  password?: string; // Legacy plaintext
+  passwordHash?: string; // Bcrypt hash
   role: 'Administrativo' | 'Comercial' | 'Contador' | 'Financeiro' | 'Tecnologia';
   department?: string;
 }
@@ -22,7 +23,10 @@ export const userService = {
     // Basic check if email exists
     const existing = await db.collection('users').where('email', '==', data.email).get();
     if (!existing.empty) {
-        throw new Error('User already exists');
+        // Update existing user to ensure latest data (like roles/password)
+        const docId = existing.docs[0].id;
+        await db.collection('users').doc(docId).update(data);
+        return { id: docId, ...data };
     }
     
     const docRef = await db.collection('users').add(data);

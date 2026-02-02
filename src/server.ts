@@ -9,8 +9,10 @@ import adminRoutes from './controllers/admin';
 import ticketRoutes from './controllers/tickets';
 import authRoutes, { authenticateJWT } from './controllers/auth';
 import { campaignService } from './services/campaign';
+import { userSeeder } from './services/userSeeder';
 
 const app = express();
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -72,8 +74,12 @@ setInterval(() => {
 }, 60000);
 
 if (require.main === module) {
-    app.listen(config.port, () => {
+    app.listen(config.port, async () => {
       console.log(`Server running on port ${config.port}`);
+      
+      // Seed Users on Startup
+      await userSeeder.run();
+      
       console.log('Campaign Engine started.');
     });
 }

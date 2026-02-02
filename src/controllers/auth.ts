@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { userService } from '../services/userService';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'lopes_secret_key_123';
@@ -29,16 +30,30 @@ export const authController = {
 
         try {
             const user = await userService.findSystemUserByEmail(loginId);
-            if (user && user.password === password) { // TODO: Use bcrypt
-                 const token = jwt.sign({ 
-                     id: user.id, 
-                     username: user.email, 
-                     role: user.role,
-                     name: user.name 
-                 }, SECRET_KEY, { expiresIn: '24h' });
-                 
-                 const { password, ...userSafe } = user;
-                 return res.json({ token, user: userSafe });
+            
+            if (user) {
+                let isValid = false;
+
+                // 1. Check Hash
+                if (user.passwordHash) {
+                    isValid = await bcrypt.compare(password, user.passwordHash);
+                } 
+                // 2. Check Plaintext (Legacy)
+                else if (user.password === password) {
+                    isValid = true;
+                }
+
+                if (isValid) {
+                    const token = jwt.sign({ 
+                        id: user.id, 
+                        username: user.email, 
+                        role: user.role,
+                        name: user.name 
+                    }, SECRET_KEY, { expiresIn: '24h' });
+                    
+                    const { password, passwordHash, ...userSafe } = user;
+                    return res.json({ token, user: userSafe });
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
