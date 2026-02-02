@@ -8,11 +8,13 @@ const router = express.Router();
 router.post('/webhook/zapi', async (req: Request, res: Response) => {
     try {
         console.log('[Webhook Z-API] Received payload:', JSON.stringify(req.body, null, 2));
-        const { phone, text, senderName, senderPhoto, photo, photoUrl } = req.body; 
+        // Add pushName and other common variations
+        const { phone, text, senderName, pushName, senderPhoto, photo, photoUrl } = req.body; 
         
         if (phone && text) {
              const messageContent = typeof text === 'object' ? text.message : text;
-             const safeSenderName = senderName || 'Cliente WhatsApp';
+             // Prioritize senderName, then pushName
+             const safeSenderName = senderName || pushName || 'Cliente WhatsApp';
              let safeProfilePicUrl = senderPhoto || photo || photoUrl || undefined;
 
              // Attempt to fetch profile picture if missing (proactive fix)
