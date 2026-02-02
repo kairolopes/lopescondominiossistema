@@ -9,8 +9,25 @@ router.post('/webhook/zapi', async (req: Request, res: Response) => {
     try {
         console.log('[Webhook Z-API] Received payload:', JSON.stringify(req.body, null, 2));
         // Add pushName and other common variations
-        const { phone, text, senderName, pushName, senderPhoto, photo, photoUrl } = req.body; 
+        const { phone, text, senderName, pushName, senderPhoto, photo, photoUrl, type, isGroup, isNewsletter, fromMe } = req.body; 
         
+        // =====================================================
+        // FILTER UNWANTED MESSAGES
+        // =====================================================
+        // Ignore: non-message events, groups, newsletters, messages sent by us
+        // Z-API usually sends 'ReceivedCallback' for incoming messages
+        if (type && type !== 'ReceivedCallback' && type !== 'Message') {
+             console.log('[Webhook Z-API] Ignored: Event type is not message', type);
+             res.status(200).json({ success: true, ignored: true });
+             return;
+        }
+
+        if (isGroup || isNewsletter || fromMe) {
+             console.log('[Webhook Z-API] Ignored:', { isGroup, isNewsletter, fromMe });
+             res.status(200).json({ success: true, ignored: true });
+             return;
+        }
+
         if (phone && text) {
              const messageContent = typeof text === 'object' ? text.message : text;
              // Prioritize senderName, then pushName
