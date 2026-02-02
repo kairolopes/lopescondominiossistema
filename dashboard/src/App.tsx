@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Login } from './Login';
 import { KanbanBoard } from './components/KanbanBoard';
 import { Sidebar } from './components/Sidebar';
+import { Profile } from './components/Profile';
 
 interface Session {
   phone: string;
@@ -37,7 +38,7 @@ function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [user, setUser] = useState<User | null>(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null);
 
-  const [activeTab, setActiveTab] = useState<'sessions' | 'kanban' | 'campaigns' | 'broadcast' | 'team'>('sessions');
+  const [activeTab, setActiveTab] = useState<'sessions' | 'kanban' | 'campaigns' | 'broadcast' | 'team' | 'profile'>('sessions');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [usersList, setUsersList] = useState<User[]>([]);
@@ -244,6 +245,12 @@ function App() {
     }
   };
 
+  const handleUpdateUser = (updatedData: any) => {
+    const updatedUser = { ...user, ...updatedData };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
   if (!token) {
     return <Login onLogin={handleLogin} />;
   }
@@ -263,6 +270,10 @@ function App() {
       <div className="main-content w-full">
         <div className="page-container">
             
+            {activeTab === 'profile' && (
+                <Profile user={user} onUpdateUser={handleUpdateUser} />
+            )}
+
             {/* SESSIONS TAB */}
             {activeTab === 'sessions' && (
                 <div>
