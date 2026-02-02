@@ -10,6 +10,7 @@ interface User {
 interface Session {
   phone: string;
   name?: string;
+  senderName?: string;
   status?: string;
   pausedAt?: string | null; // ISO string
   assigneeId?: string;

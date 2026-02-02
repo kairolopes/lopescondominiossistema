@@ -5,6 +5,7 @@ import { MessageBubble } from './MessageBubble';
 interface Session {
   phone: string;
   name?: string;
+  senderName?: string;
   step: string;
   status?: string;
   pausedAt?: string | null;
