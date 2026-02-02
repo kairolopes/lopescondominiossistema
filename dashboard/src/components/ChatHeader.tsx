@@ -59,7 +59,25 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
       .toUpperCase();
   };
 
-  const displayName = session.name || session.phone;
+  const displayName = session.name || session.senderName || session.phone;
+
+  // Format phone if displayName is same as phone
+  const formatPhone = (phone: string) => {
+    // Basic formatting for Brazil (55)(DD)(9XXXX)(XXXX)
+    const match = phone.match(/^55(\d{2})(\d{5})(\d{4})$/);
+    if (match) {
+        return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    // Try shorter (55)(DD)(XXXX)(XXXX)
+    const matchShort = phone.match(/^55(\d{2})(\d{4})(\d{4})$/);
+    if (matchShort) {
+        return `(${matchShort[1]}) ${matchShort[2]}-${matchShort[3]}`;
+    }
+    return phone;
+  };
+
+  const displayTitle = displayName === session.phone ? formatPhone(displayName) : displayName;
+  const displaySubtitle = formatPhone(session.phone);
 
   return (
     <div style={{
@@ -90,23 +108,20 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ session, users, onToggle
           flexShrink: 0 // Prevent shrinking
         }}>
           {session.profilePicUrl ? (
-            <img src={session.profilePicUrl} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={session.profilePicUrl} alt={displayTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <span style={{ fontSize: '16px', fontWeight: 600, color: '#6b7280' }}>
-              {getInitials(displayName)}
+              {getInitials(displayTitle)}
             </span>
           )}
         </div>
 
-        {/* Name & Phone */}
-        <div style={{ minWidth: 0 }}> {/* Allow text truncation */}
-          <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {displayName}
-          </h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              {session.phone}
-            </span>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#111827' }}>
+            {displayTitle}
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
+            <span style={{ fontSize: '13px', color: '#6b7280' }}>{displaySubtitle}</span>
             {/* Status Badge */}
             <span style={{
               fontSize: '10px',

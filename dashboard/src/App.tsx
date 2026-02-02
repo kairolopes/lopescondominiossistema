@@ -8,6 +8,7 @@ import { SessionCard } from './components/SessionCard';
 interface Session {
   phone: string;
   name?: string;
+  senderName?: string; // Sometimes data comes as senderName
   step: string;
   status?: string; // 'active' | 'paused'
   pausedAt?: string | null;
