@@ -3,6 +3,7 @@ import { db } from '../config/firebase';
 interface Session {
     phone: string;
     name: string;
+    photoUrl?: string; // WhatsApp profile picture
     state: string;
     lastActivity: Date;
     pausedAt?: Date; // New field to track pause start time
@@ -14,10 +15,30 @@ const sessions: Map<string, Session> = new Map();
 export const sessionManager = {
     getSession: (phone: string) => sessions.get(phone),
     
-    ensureSession: async (phone: string, name: string) => {
+    ensureSession: async (phone: string, name: string, photoUrl?: string) => {
         // 1. Check Memory
         if (sessions.has(phone)) {
             const session = sessions.get(phone)!;
+            
+            // Update profile info if changed
+            let updated = false;
+            if (name && session.name !== name) {
+                session.name = name;
+                updated = true;
+            }
+            if (photoUrl && session.photoUrl !== photoUrl) {
+                session.photoUrl = photoUrl;
+                updated = true;
+            }
+
+            // Sync updates to DB
+            if (updated && db) {
+                 await db.collection('conversations').doc(phone).set({ 
+                    senderName: session.name,
+                    photoUrl: session.photoUrl
+                }, { merge: true });
+            }
+
             // Check for auto-resume in memory
             if (session.state === 'PAUSED') {
                 const effectivePausedTime = session.pausedAt || new Date(0); // Epoch 0 if undefined
@@ -90,12 +111,22 @@ export const sessionManager = {
                     const session: Session = {
                         phone,
                         name: data?.senderName || name,
+                        profilePicUrl: data?.profilePicUrl || profilePicUrl,
                         state,
                         lastActivity: data?.lastActivity?.toDate ? data.lastActivity.toDate() : new Date(),
                         pausedAt,
                         data: {} 
                     };
                     sessions.set(phone, session);
+                    
+                    // Update DB if info changed
+                    if ((name && data?.senderName !== name) || (profilePicUrl && data?.profilePicUrl !== profilePicUrl)) {
+                         await db.collection('conversations').doc(phone).set({ 
+                            senderName: name,
+                            profilePicUrl: profilePicUrl
+                        }, { merge: true });
+                    }
+
                     console.log(`[SessionManager] Restored session for ${phone} from DB (State: ${session.state})`);
                     return session;
                 }
@@ -105,18 +136,32 @@ export const sessionManager = {
         }
 
         // 3. Create New
-        return sessionManager.createSession(phone, name);
+        return sessionManager.createSession(phone, name, profilePicUrl);
     },
 
-    createSession: (phone: string, name: string) => {
+    createSession: (phone: string, name: string, profilePicUrl?: string) => {
         const session: Session = {
             phone,
             name,
+            profilePicUrl,
             state: 'IDLE',
             lastActivity: new Date(),
             data: {}
         };
         sessions.set(phone, session);
+
+        // Persist new session
+        if (db) {
+            db.collection('conversations').doc(phone).set({
+                phone,
+                senderName: name,
+                profilePicUrl: profilePicUrl || null,
+                status: 'active',
+                lastActivity: new Date(),
+                createdAt: new Date()
+            }, { merge: true }).catch(console.error);
+        }
+
         return session;
     },
 

@@ -7,14 +7,15 @@ const router = express.Router();
 router.post('/webhook/zapi', async (req: Request, res: Response) => {
     try {
         console.log('[Webhook Z-API] Received payload:', JSON.stringify(req.body, null, 2));
-        const { phone, text, senderName } = req.body; 
+        const { phone, text, senderName, senderPhoto, photo, photoUrl } = req.body; 
         
         if (phone && text) {
              const messageContent = typeof text === 'object' ? text.message : text;
              const safeSenderName = senderName || 'Cliente WhatsApp';
+             const safeProfilePicUrl = senderPhoto || photo || photoUrl || undefined;
 
              // Async processing
-             botFlow.handleMessage(phone, messageContent, safeSenderName).catch(console.error);
+             botFlow.handleMessage(phone, messageContent, safeSenderName, safeProfilePicUrl).catch(console.error);
         } else {
              console.warn('[Webhook Z-API] Invalid payload');
         }
@@ -71,7 +72,7 @@ router.post('/webhook/whatsapp', async (req: Request, res: Response) => {
                 console.log(`[Webhook Meta] Msg from ${from}: ${msg_body}`);
 
                 // Process via existing Bot Logic
-                botFlow.handleMessage(from, msg_body, name).catch(console.error);
+                botFlow.handleMessage(from, msg_body, name, undefined).catch(console.error);
             }
             res.sendStatus(200);
         } else {

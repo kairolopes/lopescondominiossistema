@@ -9,7 +9,7 @@ const AI_SIGNATURE = '*Penélope - Secretária Virtual*\n';
 const AI_NAME = 'Penélope';
 
 export const botFlow = {
-  handleMessage: async (phone: string, message: string, senderName: string) => {
+  handleMessage: async (phone: string, message: string, senderName: string, profilePicUrl?: string) => {
     try {
       console.log(`[Flow] Processing message from ${phone}: ${message}`);
       
@@ -33,7 +33,7 @@ export const botFlow = {
       }
 
       // 1. Check Session State
-      let session = await sessionManager.ensureSession(phone, senderName);
+      let session = await sessionManager.ensureSession(phone, senderName, profilePicUrl);
 
       // If session is PAUSED (Human Intervention), do not process
       if (session.state === 'PAUSED') {
