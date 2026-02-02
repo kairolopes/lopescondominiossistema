@@ -48,12 +48,17 @@ export const databaseService = {
                 .add(msgData);
 
             // Update last message in conversation doc
-            const conversationUpdate = {
+            const conversationUpdate: any = {
                 lastMessage: message.content,
                 lastActivity: admin.firestore.Timestamp.fromDate(message.timestamp),
-                phone: message.phone,
-                senderName: safeSenderName
+                phone: message.phone
             };
+
+            // ONLY update senderName/profile if the message is from the USER
+            // This prevents the bot (assistant) from overwriting the client's name with its own name
+            if (message.role === 'user') {
+                conversationUpdate.senderName = safeSenderName;
+            }
 
             await db.collection('conversations').doc(message.phone).set(conversationUpdate, { merge: true });
 
