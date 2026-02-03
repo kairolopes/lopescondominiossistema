@@ -51,9 +51,6 @@ function App() {
   // Derived state for selected session to ensure real-time updates
   const selectedSession = sessions.find(s => s.phone === selectedSessionId) || null;
   
-  // Profile Completion State
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [profileData, setProfileData] = useState({ name: '', jobTitle: '' });
 
   // Forms
   const [broadcastMsg, setBroadcastMsg] = useState('');
@@ -93,41 +90,6 @@ function App() {
     return res;
   };
 
-  useEffect(() => {
-     if (user && (!user.name || !user.jobTitle || user.name === 'Master Admin')) {
-         setShowProfileModal(true);
-         setProfileData({ 
-             name: user.name !== 'Master Admin' ? user.name : '', 
-             jobTitle: user.jobTitle || 'Comercial'
-         });
-     }
-    }, [user]);
-
-    const handleUpdateProfile = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const res = await fetchWithAuth(`${AUTH_URL}/users/me`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: profileData.name,
-                    jobTitle: profileData.jobTitle
-                })
-            });
- 
-            if (res.ok) {
-                const updatedUser = { ...user!, ...profileData };
-                setUser(updatedUser);
-                localStorage.setItem('user', JSON.stringify(updatedUser));
-                setShowProfileModal(false);
-            } else {
-                throw new Error('Falha ao atualizar');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Erro ao atualizar perfil');
-        }
-    };
 
   const fetchSessions = async () => {
     if (!token) return;
@@ -242,6 +204,39 @@ function App() {
         console.error(err);
         alert('Erro ao criar usuário');
     }
+  };
+
+  const handleUpdateSystemUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    try {
+        const body: any = { ...editUserData };
+        if (!body.password) delete body.password; // Don't send empty password
+
+        await fetchWithAuth(`${AUTH_URL}/users/${editingUser.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        alert('Usuário atualizado com sucesso!');
+        setEditingUser(null);
+        fetchUsers();
+    } catch (err) {
+        console.error(err);
+        alert('Erro ao atualizar usuário');
+    }
+  };
+
+  const openEditUserModal = (u: User) => {
+      setEditingUser(u);
+      setEditUserData({
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          jobTitle: u.jobTitle || '',
+          password: '' // Start empty
+      });
   };
 
   const handleSendMessage = async (phone: string, message: string) => {
@@ -464,54 +459,7 @@ function App() {
         )}
       </Layout>
 
-      {/* Profile Modal */}
-      {showProfileModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999
-        }}>
-          <div className="card" style={{ width: '400px', padding: '24px' }}>
-            <h2 style={{ marginBottom: '16px', fontSize: '20px' }}>Complete seu Perfil</h2>
-            <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
-              Para continuar, precisamos que você preencha seus dados para identificação nos atendimentos.
-            </p>
-            <form onSubmit={handleUpdateProfile}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Seu Nome Completo</label>
-                <input 
-                  className="input"
-                  value={profileData.name}
-                  onChange={e => setProfileData({...profileData, name: e.target.value})}
-                  placeholder="Ex: João Silva"
-                  required
-                />
-              </div>
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Cargo / Área</label>
-                <select 
-                  className="input"
-                  value={profileData.jobTitle}
-                  onChange={e => setProfileData({...profileData, jobTitle: e.target.value})}
-                  required
-                >
-                  <option value="">Selecione...</option>
-                  <option value="Administrativo">Administrativo</option>
-                  <option value="Comercial">Comercial</option>
-                  <option value="Contabilidade">Contabilidade</option>
-                  <option value="Financeiro">Financeiro</option>
-                  <option value="Jurídico">Jurídico</option>
-                    <option value="Tecnologia">Tecnologia</option>
-                  </select>
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                Salvar e Continuar
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+
 
       {/* Admin Edit User Modal */}
       {editingUser && (
