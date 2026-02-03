@@ -27,10 +27,18 @@ export const userSeeder = {
                 // Determine valid jobTitle (default to Administrativo if unknown)
                 const validTitles = ['Administrativo', 'Comercial', 'Contabilidade', 'Financeiro', 'Jurídico', 'Tecnologia'];
                 let jobTitle = 'Administrativo';
-                if (validTitles.includes(u.jobTitle)) {
+                
+                // Check direct jobTitle
+                if (u.jobTitle && validTitles.includes(u.jobTitle)) {
                     jobTitle = u.jobTitle;
-                } else if (validTitles.includes(u.department)) { // Legacy fallback
+                } 
+                // Check department legacy
+                else if (u.department && validTitles.includes(u.department)) { 
                     jobTitle = u.department;
+                }
+                // Check role legacy (from users.json)
+                else if (u.role && validTitles.includes(u.role)) {
+                    jobTitle = u.role;
                 }
 
                 const userData: SystemUser = {
