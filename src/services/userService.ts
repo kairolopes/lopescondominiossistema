@@ -6,7 +6,7 @@ export interface SystemUser {
   email: string;
   password?: string; // In a real app, hash this!
   role: 'admin' | 'agent';
-  department?: string;
+  jobTitle?: string; // Cargo personalizado para assinatura
 }
 
 export const userService = {
@@ -46,5 +46,11 @@ export const userService = {
         const { password, ...userWithoutPassword } = data as SystemUser;
         return { id: doc.id, ...userWithoutPassword };
     });
+  },
+
+  async updateSystemUser(id: string, updates: Partial<SystemUser>) {
+    if (!db) throw new Error('Database not initialized');
+    await db.collection('users').doc(id).set(updates, { merge: true });
+    return { id, ...updates };
   }
 };

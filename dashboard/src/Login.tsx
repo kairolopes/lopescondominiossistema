@@ -29,6 +29,7 @@ export function Login({ onLogin }: LoginProps) {
             const data = await res.json();
             onLogin(data.token, data.user);
         } catch (err) {
+            console.error(err);
             setError('Login falhou. Verifique e-mail e senha.');
         }
     };

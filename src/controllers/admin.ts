@@ -27,7 +27,17 @@ export const adminController = {
             //         Message
             let finalMessage = message;
             if (senderName) {
-                const roleDisplay = senderRole ? ` - ${senderRole}` : '';
+                // If senderRole (now potentially jobTitle) is present, use it directly.
+                // Fallback to mapping only if it matches system roles exactly and wasn't customized
+                const roleMap: any = { 'agent': 'Agente', 'admin': 'Admin', 'master': 'Master' };
+                let displayRole = senderRole;
+                
+                // Only translate if it is strictly one of the system keys, otherwise trust the custom title
+                if (roleMap[senderRole]) {
+                     displayRole = roleMap[senderRole];
+                }
+                
+                const roleDisplay = displayRole ? ` - ${displayRole}` : '';
                 finalMessage = `*${senderName}${roleDisplay}*\n${message}`;
             }
 
@@ -88,6 +98,24 @@ export const adminController = {
         }
     },
 
+    async updateSessionTags(req: Request, res: Response) {
+        try {
+            const { phone } = req.params;
+            const { tags } = req.body; // string[]
+            
+            if (!db) return res.status(503).json({ error: 'Database not initialized' });
+
+            await db.collection('conversations').doc(phone).set({ 
+                tags: tags
+            }, { merge: true });
+
+            res.json({ success: true, tags });
+        } catch (error) {
+            console.error('Error updating session tags:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
     async getConversations(req: Request, res: Response) {
         try {
             if (!db) return res.status(503).json({ error: 'Database not initialized' });
@@ -137,8 +165,9 @@ export const adminController = {
                 
                 return {
                     phone: phone,
+                    channel: 'whatsapp', // Default for now
                     step: 'active', 
-                    tags: ['whatsapp'], 
+                    tags: data.tags || ['whatsapp'], 
                     status: data.status || 'active',
                     assigneeId: data.assigneeId || null,
                     history: history // ordered asc (oldest first) after reverse
@@ -213,6 +242,7 @@ router.get('/conversations/:phone/messages', adminController.getMessages);
 router.post('/messages/send', adminController.sendMessage);
 router.post('/sessions/:phone/status', adminController.updateSessionStatus);
 router.post('/sessions/:phone/assign', adminController.assignSession);
+router.post('/sessions/:phone/tags', adminController.updateSessionTags);
 
 // Campaign endpoints
 router.get('/campaigns', adminController.getCampaigns);

@@ -22,7 +22,7 @@ const seedAdmin = async () => {
                 email: email,
                 password: password,
                 role: 'admin',
-                department: 'Management'
+                jobTitle: 'Master'
             });
             console.log('Admin user created successfully.');
         }

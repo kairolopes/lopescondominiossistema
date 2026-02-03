@@ -14,7 +14,7 @@ export const authController = {
             const token = jwt.sign({ username: 'admin', role: 'admin', name: 'Master Admin' }, SECRET_KEY, { expiresIn: '24h' });
             return res.json({ 
                 token, 
-                user: { name: 'Master Admin', email: 'admin', role: 'master', department: 'IT' } 
+                user: { name: 'Master Admin', email: 'admin', role: 'master' } 
             });
         }
 
@@ -47,11 +47,23 @@ export const authController = {
         }
     },
 
+    async updateUser(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user.id;
+            const { name, role, jobTitle } = req.body;
+            
+            await userService.updateSystemUser(userId, { name, role, jobTitle });
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
     async createUser(req: Request, res: Response) {
         try {
-            const { name, email, password, role, department } = req.body;
+            const { name, email, password, role, jobTitle } = req.body;
             const newUser = await userService.createSystemUser({
-                name, email, password, role, department
+                name, email, password, role, jobTitle
             });
             res.status(201).json(newUser);
         } catch (error: any) {
@@ -82,5 +94,6 @@ import express from 'express';
 const router = express.Router();
 router.post('/login', authController.login);
 router.get('/users', authenticateJWT, authController.getUsers);
-router.post('/users', authenticateJWT, authController.createUser); // Only admin should access, handled by frontend for now or add middleware
+router.post('/users', authenticateJWT, authController.createUser);
+router.patch('/users/me', authenticateJWT, authController.updateUser);
 export default router;
