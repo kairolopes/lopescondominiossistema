@@ -317,6 +317,21 @@ function App() {
       }
   };
 
+  const handleTransferSession = async (phone: string, assigneeId: string) => {
+    try {
+        await fetchWithAuth(`${API_URL}/sessions/${phone}/assign`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assigneeId })
+        });
+        fetchSessions();
+        alert('Atendimento transferido com sucesso!');
+    } catch (err) {
+        console.error(err);
+        alert('Erro ao transferir atendimento');
+    }
+  };
+
   if (!token) {
     return <Login onLogin={handleLogin} />;
   }
@@ -350,7 +365,9 @@ function App() {
             onTogglePause={handleTogglePause}
             onAddTag={handleAddTag}
             onRemoveTag={handleRemoveTag}
+            onTransferSession={handleTransferSession}
             user={user}
+            usersList={usersList}
           />
         )}
 
