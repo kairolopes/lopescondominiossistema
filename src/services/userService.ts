@@ -34,7 +34,12 @@ export const userService = {
     const snapshot = await db.collection('users').where('email', '==', email).limit(1).get();
     if (snapshot.empty) return null;
     const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as SystemUser;
+    const data = doc.data();
+    // Auto-migrate department to jobTitle for legacy support
+    if (!data.jobTitle && (data as any).department) {
+      data.jobTitle = (data as any).department;
+    }
+    return { id: doc.id, ...data } as SystemUser;
   },
 
   async getAllSystemUsers() {
@@ -42,6 +47,10 @@ export const userService = {
     const snapshot = await db.collection('users').get();
     return snapshot.docs.map(doc => {
         const data = doc.data();
+        // Auto-migrate department to jobTitle for legacy support
+        if (!data.jobTitle && (data as any).department) {
+          data.jobTitle = (data as any).department;
+        }
         // Exclude password
         const { password, ...userWithoutPassword } = data as SystemUser;
         return { id: doc.id, ...userWithoutPassword };

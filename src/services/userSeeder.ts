@@ -25,7 +25,7 @@ export const userSeeder = {
                 if (u.role === 'admin' || u.role === 'master') sysRole = 'admin';
 
                 // Determine valid jobTitle (default to Administrativo if unknown)
-                const validTitles = ['Administrativo', 'Comercial', 'Contabilidade', 'Financeiro', 'Jurídico'];
+                const validTitles = ['Administrativo', 'Comercial', 'Contabilidade', 'Financeiro', 'Jurídico', 'Tecnologia'];
                 let jobTitle = 'Administrativo';
                 if (validTitles.includes(u.jobTitle)) {
                     jobTitle = u.jobTitle;

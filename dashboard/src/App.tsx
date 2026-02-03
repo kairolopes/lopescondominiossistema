@@ -430,6 +430,7 @@ function App() {
                     <option value="Contabilidade">Contabilidade</option>
                     <option value="Financeiro">Financeiro</option>
                     <option value="Jurídico">Jurídico</option>
+                    <option value="Tecnologia">Tecnologia</option>
                   </select>
                   <button type="submit" className="btn btn-primary w-fit">Adicionar Usuário</button>
                 </form>
@@ -496,7 +497,8 @@ function App() {
                   <option value="Contabilidade">Contabilidade</option>
                   <option value="Financeiro">Financeiro</option>
                   <option value="Jurídico">Jurídico</option>
-                </select>
+                    <option value="Tecnologia">Tecnologia</option>
+                  </select>
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
                 Salvar e Continuar
