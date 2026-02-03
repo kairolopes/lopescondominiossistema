@@ -41,12 +41,15 @@ function App() {
   const [user, setUser] = useState<User | null>(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null);
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'sessions' | 'kanban' | 'campaigns' | 'broadcast' | 'team'>('dashboard');
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [usersList, setUsersList] = useState<User[]>([]);
+  
+  // Derived state for selected session to ensure real-time updates
+  const selectedSession = sessions.find(s => s.phone === selectedSessionId) || null;
   
   // Profile Completion State
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -334,7 +337,7 @@ function App() {
             sessions={sessions} 
             onNavigate={(tab, session) => {
               setActiveTab(tab as any);
-              if (session) setSelectedSession(session);
+              if (session) setSelectedSessionId(session.phone);
             }}
             connectionError={connectionError}
             lastUpdated={lastUpdated}
@@ -345,7 +348,7 @@ function App() {
           <ChatInterface 
             sessions={sessions}
             selectedSession={selectedSession}
-            onSelectSession={setSelectedSession}
+            onSelectSession={(s) => setSelectedSessionId(s.phone)}
             onSendMessage={handleSendMessage}
             onTogglePause={handleTogglePause}
             onAddTag={handleAddTag}
