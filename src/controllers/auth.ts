@@ -96,4 +96,5 @@ router.post('/login', authController.login);
 router.get('/users', authenticateJWT, authController.getUsers);
 router.post('/users', authenticateJWT, authController.createUser);
 router.patch('/users/me', authenticateJWT, authController.updateUser);
+router.patch('/users/:id', authenticateJWT, authController.updateUserById);
 export default router;

@@ -66,6 +66,8 @@ function App() {
 
   // User Mgmt Form
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'agent', jobTitle: '' });
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUserData, setEditUserData] = useState({ name: '', email: '', password: '', role: 'agent', jobTitle: '' });
 
   const handleLogin = (token: string, userData: any) => {
     localStorage.setItem('token', token);
@@ -506,6 +508,95 @@ function App() {
               <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
                 Salvar e Continuar
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Edit User Modal */}
+      {editingUser && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div className="card" style={{ width: '500px', padding: '24px' }}>
+            <div className="flex justify-between items-center mb-6">
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Editar Usuário</h2>
+                <button onClick={() => setEditingUser(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            
+            <form onSubmit={handleUpdateSystemUser} className="flex flex-col gap-4">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1">Nome</label>
+                    <input 
+                      className="input w-full" 
+                      value={editUserData.name} 
+                      onChange={e => setEditUserData({...editUserData, name: e.target.value})} 
+                      required 
+                    />
+                </div>
+                <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input 
+                      className="input w-full" 
+                      type="email"
+                      value={editUserData.email} 
+                      onChange={e => setEditUserData({...editUserData, email: e.target.value})} 
+                      required 
+                    />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1">Nova Senha (opcional)</label>
+                    <input 
+                      className="input w-full" 
+                      type="password"
+                      placeholder="Deixe em branco para manter"
+                      value={editUserData.password} 
+                      onChange={e => setEditUserData({...editUserData, password: e.target.value})} 
+                    />
+                </div>
+                <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1">Permissão</label>
+                    <select 
+                      className="input w-full" 
+                      value={editUserData.role} 
+                      onChange={e => setEditUserData({...editUserData, role: e.target.value})}
+                    >
+                      <option value="agent">Agente</option>
+                      <option value="admin">Admin</option>
+                      <option value="master">Master</option>
+                    </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Cargo</label>
+                <select 
+                  className="input w-full" 
+                  value={editUserData.jobTitle} 
+                  onChange={e => setEditUserData({...editUserData, jobTitle: e.target.value})} 
+                  required
+                >
+                    <option value="">Selecione o Cargo...</option>
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Comercial">Comercial</option>
+                    <option value="Contabilidade">Contabilidade</option>
+                    <option value="Financeiro">Financeiro</option>
+                    <option value="Jurídico">Jurídico</option>
+                    <option value="Tecnologia">Tecnologia</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button type="button" onClick={() => setEditingUser(null)} className="btn btn-secondary">Cancelar</button>
+                <button type="submit" className="btn btn-primary">Salvar Alterações</button>
+              </div>
             </form>
           </div>
         </div>
