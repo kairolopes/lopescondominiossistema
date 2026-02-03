@@ -34,7 +34,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onSendMessage,
   onTogglePause,
   onAddTag,
-  onRemoveTag
+  onRemoveTag,
+  user
 }) => {
   const [msgText, setMsgText] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
