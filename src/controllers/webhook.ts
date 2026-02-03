@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { botFlow } from '../bot/flow';
+import { zapiService } from '../services/zapi';
 
 const router = express.Router();
 
@@ -7,14 +8,57 @@ const router = express.Router();
 router.post('/webhook/zapi', async (req: Request, res: Response) => {
     try {
         console.log('[Webhook Z-API] Received payload:', JSON.stringify(req.body, null, 2));
-        const { phone, text, senderName } = req.body; 
+        // Add pushName and other common variations
+        const { phone, text, senderName, pushName, senderPhoto, photo, photoUrl, type, isGroup, isNewsletter, fromMe } = req.body; 
         
+        // =====================================================
+        // FILTER UNWANTED MESSAGES
+        // =====================================================
+        // Ignore: non-message events, groups, newsletters, messages sent by us
+        // Z-API usually sends 'ReceivedCallback' for incoming messages
+        if (type && type !== 'ReceivedCallback' && type !== 'Message') {
+             console.log('[Webhook Z-API] Ignored: Event type is not message', type);
+             res.status(200).json({ success: true, ignored: true });
+             return;
+        }
+
+        if (isGroup || isNewsletter || fromMe) {
+             console.log('[Webhook Z-API] Ignored:', { isGroup, isNewsletter, fromMe });
+             res.status(200).json({ success: true, ignored: true });
+             return;
+        }
+
         if (phone && text) {
              const messageContent = typeof text === 'object' ? text.message : text;
-             const safeSenderName = senderName || 'Cliente WhatsApp';
+             // Prioritize senderName, then pushName
+             let safeSenderName = senderName || pushName;
+             let safeProfilePicUrl = senderPhoto || photo || photoUrl || undefined;
+
+             // Attempt to fetch name if missing (proactive fix)
+             if (!safeSenderName) {
+                 try {
+                     console.log(`[Webhook Z-API] Fetching contact name for ${phone}...`);
+                     safeSenderName = await zapiService.getContactName(phone);
+                 } catch (err) {
+                     console.warn('[Webhook Z-API] Failed to fetch contact name:', err);
+                 }
+             }
+             
+             // Final fallback
+             safeSenderName = safeSenderName || 'Cliente WhatsApp';
+
+             // Attempt to fetch profile picture if missing (proactive fix)
+             if (!safeProfilePicUrl) {
+                 try {
+                     console.log(`[Webhook Z-API] Fetching profile picture for ${phone}...`);
+                     safeProfilePicUrl = await zapiService.getProfilePicture(phone);
+                 } catch (err) {
+                     console.warn('[Webhook Z-API] Failed to fetch profile pic:', err);
+                 }
+             }
 
              // Async processing
-             botFlow.handleMessage(phone, messageContent, safeSenderName).catch(console.error);
+             botFlow.handleMessage(phone, messageContent, safeSenderName, safeProfilePicUrl).catch(console.error);
         } else {
              console.warn('[Webhook Z-API] Invalid payload');
         }
@@ -71,7 +115,7 @@ router.post('/webhook/whatsapp', async (req: Request, res: Response) => {
                 console.log(`[Webhook Meta] Msg from ${from}: ${msg_body}`);
 
                 // Process via existing Bot Logic
-                botFlow.handleMessage(from, msg_body, name).catch(console.error);
+                botFlow.handleMessage(from, msg_body, name, undefined).catch(console.error);
             }
             res.sendStatus(200);
         } else {
@@ -88,19 +132,58 @@ router.post('/webhook/antigravity', async (req: Request, res: Response) => {
     try {
         console.log('[Antigravity Webhook] Payload:', JSON.stringify(req.body, null, 2));
         
-        // Google Antigravity (wrapping Meta API) often uses 'messages' array
-        // or a custom agent event format. 
-        // We'll log it first to understand the structure during integration.
+        // Handle Google Business Messages / Antigravity payload structure
+        // Often follows: { conversationId, message: { text: "..." }, sender: { displayName: "...", avatarUrl: "..." } }
         
-        // Placeholder logic assuming a standard structure (to be refined)
         const { conversationId, message, sender } = req.body;
         
         if (conversationId && message) {
             // Normalize phone number from conversationId (often 'whatsapp:+55...')
             const phone = conversationId.replace('whatsapp:', '').replace('+', '');
-            const text = message.text || message;
+            const text = typeof message === 'string' ? message : (message.text || JSON.stringify(message));
             
-            await botFlow.handleMessage(phone, text, sender || 'User');
+            // Extract sender info safely
+            let senderName: string | undefined = undefined;
+            let profilePicUrl: string | undefined = undefined;
+
+            if (sender) {
+                if (typeof sender === 'string') {
+                    senderName = sender;
+                } else if (typeof sender === 'object') {
+                    senderName = sender.displayName || sender.name || undefined;
+                    profilePicUrl = sender.avatarUrl || sender.photoUrl || sender.profilePicUrl || undefined;
+                }
+            }
+
+            // Proactive fallback for name
+            if (!senderName) {
+                 try {
+                     console.log(`[Antigravity] Fetching missing name for ${phone} via Z-API...`);
+                     senderName = await zapiService.getContactName(phone);
+                 } catch (err) {
+                     console.warn('[Antigravity] Failed to fetch name via Z-API:', err);
+                 }
+            }
+
+            senderName = senderName || 'Cliente WhatsApp';
+
+            console.log(`[Antigravity] Extracted - Phone: ${phone}, Name: ${senderName}, Photo: ${!!profilePicUrl}`);
+
+            // If profile pic is missing, try to fetch it via Z-API (proactive fallback)
+            if (!profilePicUrl) {
+                try {
+                    console.log(`[Antigravity] Fetching missing profile picture for ${phone} via Z-API...`);
+                    profilePicUrl = await zapiService.getProfilePicture(phone);
+                } catch (err) {
+                    console.warn('[Antigravity] Failed to fetch profile pic via Z-API:', err);
+                }
+            }
+            
+            await botFlow.handleMessage(phone, text, senderName, profilePicUrl);
+        } else {
+             // Fallback for other formats (e.g. Dialogflow wrapping)
+             console.warn('[Antigravity Webhook] Unknown payload format, checking alternatives...');
+             // Add logic here if payload is different (e.g. req.body.queryResult...)
         }
 
         res.status(200).json({ status: 'received' });

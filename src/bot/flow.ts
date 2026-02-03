@@ -4,9 +4,13 @@ import { aiService } from '../services/ai';
 import { userService } from '../services/userService';
 import { sessionManager } from '../services/sessionManager';
 import { databaseService } from '../services/database';
+import { zapiService } from '../services/zapi';
+
+const AI_SIGNATURE = '*Lopes Condomínios - Assistente Virtual*\n';
+const AI_NAME = 'Lopes Condomínios';
 
 export const botFlow = {
-  handleMessage: async (phone: string, message: string, senderName: string) => {
+  handleMessage: async (phone: string, message: string, senderName: string, profilePicUrl?: string) => {
     try {
       console.log(`[Flow] Processing message from ${phone}: ${message}`);
       
@@ -20,17 +24,66 @@ export const botFlow = {
       });
 
       // 0. Super Admin / Reset Command (Always allowed)
-      if (message.trim().toLowerCase() === '#bot' || message.trim().toLowerCase() === '#reset') {
+      const cleanMsg = message.trim().toLowerCase();
+
+      if (cleanMsg === '#bot' || cleanMsg === '#reset') {
           console.log(`[Flow] Force resetting session for ${phone}`);
           sessionManager.updateState(phone, 'IDLE');
           // Sync with DB to ensure it persists
           await databaseService.saveSession(phone, { status: 'active' });
-          await whatsappService.sendText(phone, '🤖 Bot reativado! Estou de volta.', 'assistant', 'Bot Lopes');
+          await whatsappService.sendText(phone, `${AI_SIGNATURE}🤖 Bot reativado! Estou de volta.`, 'assistant', AI_NAME);
+          return;
+      }
+
+      // Hidden Command: Force Sync Profile Pictures and Names
+      if (cleanMsg === '#sync_profiles') {
+          await whatsappService.sendText(phone, `${AI_SIGNATURE}🔄 Iniciando atualização de perfis (fotos/nomes)...`, 'assistant', AI_NAME);
+          
+          const allDocs = await databaseService.getAllConversations();
+          let count = 0;
+          for (const doc of allDocs) {
+              if (!doc.phone) continue;
+
+              let updated = false;
+              const updates: any = {};
+
+              // 1. Sync Photo if missing
+              if (!doc.profilePicUrl) {
+                  try {
+                      const pic = await zapiService.getProfilePicture(doc.phone);
+                      if (pic) {
+                          updates.profilePicUrl = pic;
+                          updated = true;
+                      }
+                  } catch (e) {
+                      console.error(`Failed to sync profile pic for ${doc.phone}`, e);
+                  }
+              }
+
+              // 2. Sync Name if missing or default
+              if (!doc.senderName || doc.senderName === 'Cliente WhatsApp') {
+                  try {
+                      const name = await zapiService.getContactName(doc.phone);
+                      if (name) {
+                          updates.senderName = name;
+                          updated = true;
+                      }
+                  } catch (e) {
+                      console.error(`Failed to sync contact name for ${doc.phone}`, e);
+                  }
+              }
+
+              if (updated) {
+                  await databaseService.saveSession(doc.phone, updates);
+                  count++;
+              }
+          }
+          await whatsappService.sendText(phone, `${AI_SIGNATURE}✅ Atualização concluída! ${count} perfis atualizados.`, 'assistant', AI_NAME);
           return;
       }
 
       // 1. Check Session State
-      let session = await sessionManager.ensureSession(phone, senderName);
+      let session = await sessionManager.ensureSession(phone, senderName, profilePicUrl);
 
       // If session is PAUSED (Human Intervention), do not process
       if (session.state === 'PAUSED') {
@@ -43,7 +96,7 @@ export const botFlow = {
         case 'IDLE':
           // Start conversation / Identify user
           if (message.toLowerCase().match(/^(oi|ola|olá|bom dia|boa tarde|boa noite|iniciar|start|menu)$/)) {
-            await whatsappService.sendText(phone, `Olá ${senderName}, sou o assistente virtual da Lopes Condomínios. Como posso ajudar hoje?`, 'assistant', 'Bot Lopes');
+            await whatsappService.sendText(phone, `${AI_SIGNATURE}Olá ${senderName}, sou a assistente virtual da Lopes Condomínios. Como posso ajudar hoje?`, 'assistant', AI_NAME);
             sessionManager.updateState(phone, 'WAITING_MENU');
           } else {
              // If user sends a specific query immediately, skip greeting and process
@@ -55,41 +108,41 @@ export const botFlow = {
 
         case 'WAITING_MENU':
           if (message.toLowerCase().includes('boleto') || message.includes('1')) {
-             await whatsappService.sendText(phone, 'Por favor, digite o CPF do titular (apenas números) para eu localizar seus boletos.', 'assistant', 'Bot Lopes');
+             await whatsappService.sendText(phone, `${AI_SIGNATURE}Por favor, digite o CPF do titular (apenas números) para eu localizar seus boletos.`, 'assistant', AI_NAME);
              sessionManager.updateState(phone, 'WAITING_CPF');
           } else if (message.toLowerCase().includes('reserva') || message.includes('2')) {
-             await whatsappService.sendText(phone, 'Para reservas, acesse nosso portal: https://lopes.superlogica.net/clients/areadocondomino', 'assistant', 'Bot Lopes');
+             await whatsappService.sendText(phone, `${AI_SIGNATURE}Para reservas, acesse nosso portal: https://lopes.superlogica.net/clients/areadocondomino`, 'assistant', AI_NAME);
              sessionManager.updateState(phone, 'IDLE'); // Reset
           } else {
              // Default to AI for general questions
              const aiResponse = await aiService.generateResponse(message);
-             await whatsappService.sendText(phone, aiResponse, 'assistant', 'Bot Lopes');
+             await whatsappService.sendText(phone, `${AI_SIGNATURE}${aiResponse}`, 'assistant', AI_NAME);
           }
           break;
 
         case 'WAITING_CPF':
           const cpf = message.replace(/\D/g, '');
           if (cpf.length !== 11) {
-             await whatsappService.sendText(phone, 'CPF inválido. Por favor, digite novamente (11 números).', 'assistant', 'Bot Lopes');
+             await whatsappService.sendText(phone, `${AI_SIGNATURE}CPF inválido. Por favor, digite novamente (11 números).`, 'assistant', AI_NAME);
              return;
           }
 
-          await whatsappService.sendText(phone, 'Buscando boletos... aguarde um momento.', 'assistant', 'Bot Lopes');
+          await whatsappService.sendText(phone, `${AI_SIGNATURE}Buscando boletos... aguarde um momento.`, 'assistant', AI_NAME);
           
           try {
             const slips = await superlogicaService.getPendingSlips(cpf);
             if (slips.length > 0) {
-                let responseText = 'Encontrei os seguintes boletos em aberto:\n\n';
+                let responseText = `${AI_SIGNATURE}Encontrei os seguintes boletos em aberto:\n\n`;
                 slips.forEach((slip: any) => {
                     responseText += `📅 Vencimento: ${slip.dt_vencimento_recb}\n💰 Valor: R$ ${slip.vl_emitido_recb}\n🔢 Linha Digitável: ${slip.linhadigitavel_recb}\n👉 Link: ${slip.link_segunda_via}\n\n`;
                 });
-                await whatsappService.sendText(phone, responseText, 'assistant', 'Bot Lopes');
+                await whatsappService.sendText(phone, responseText, 'assistant', AI_NAME);
             } else {
-                await whatsappService.sendText(phone, 'Não encontrei boletos pendentes para este CPF.', 'assistant', 'Bot Lopes');
+                await whatsappService.sendText(phone, `${AI_SIGNATURE}Não encontrei boletos pendentes para este CPF.`, 'assistant', AI_NAME);
             }
           } catch (err) {
              console.error('Error fetching slips:', err);
-             await whatsappService.sendText(phone, 'Houve um erro ao consultar os boletos. Tente novamente mais tarde.', 'assistant', 'Bot Lopes');
+             await whatsappService.sendText(phone, `${AI_SIGNATURE}Houve um erro ao consultar os boletos. Tente novamente mais tarde.`, 'assistant', AI_NAME);
           }
           sessionManager.updateState(phone, 'IDLE');
           break;
@@ -101,7 +154,7 @@ export const botFlow = {
 
     } catch (error) {
       console.error('[Flow] Error handling message:', error);
-      await whatsappService.sendText(phone, 'Desculpe, tive um erro interno. Tente novamente.', 'assistant', 'Bot Lopes');
+      await whatsappService.sendText(phone, `${AI_SIGNATURE}Desculpe, tive um erro interno. Tente novamente.`, 'assistant', AI_NAME);
     }
   }
 };

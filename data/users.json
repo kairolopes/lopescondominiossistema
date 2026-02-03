@@ -4,55 +4,48 @@
     "name": "Kairo Lopes",
     "email": "kairolopes@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "master",
-    "department": "Tecnologia"
+    "role": "Tecnologia"
   },
   {
     "id": "1769797195128tmru4dvga",
     "name": "Rafael Oliveira",
     "email": "financeiroservircontabil@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
-    "department": "Contabilidade"
+    "role": "Contabilidade"
   },
   {
     "id": "17697971951285wu83hqik",
     "name": "Priscila Alencar",
     "email": "rhservircontabil@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
-    "department": "Contabilidade"
+    "role": "Administrativo"
   },
   {
     "id": "1769797195128zhl5w1v9w",
     "name": "Micael Gomes",
     "email": "fiscalservircontabil@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
-    "department": "Contabilidade"
+    "role": "Contabilidade"
   },
   {
     "id": "176979719512840hnkb7xw",
     "name": "Adiel Macedo",
     "email": "adielcm@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
-    "department": "Contabilidade"
+    "role": "Contabilidade"
   },
   {
     "id": "1769797195128p7o5flxn3",
     "name": "Paolla Santiago",
     "email": "paollasantiago15@gmail.com",
     "passwordHash": "$2b$10$vu/xLf7P/8RjH3rJshI.Nen3yhGuDEIkFkZDCYraPdekcyJSp6znq",
-    "role": "user",
-    "department": "Financeiro"
+    "role": "Financeiro"
   },
   {
     "id": "1769797711529",
     "name": "Gabrielle Fernandes",
     "email": "gabbyy.fernandes0@gmail.com",
-    "department": "Financeiro",
-    "role": "user",
-    "passwordHash": "$2b$10$4OvwuAbiIdCfIpxPlksCqusSDbWIzMTQA.JTxTygrmSKJlfu.OB52"
+    "passwordHash": "$2b$10$4OvwuAbiIdCfIpxPlksCqusSDbWIzMTQA.JTxTygrmSKJlfu.OB52",
+    "role": "Financeiro"
   }
 ]

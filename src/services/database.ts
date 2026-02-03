@@ -10,6 +10,15 @@ export interface Message {
     senderName?: string;
 }
 
+export interface ConversationData {
+    phone: string;
+    senderName?: string;
+    profilePicUrl?: string;
+    lastMessage?: string;
+    lastActivity?: any;
+    [key: string]: any;
+}
+
 export const databaseService = {
     saveMessage: async (message: Message) => {
         if (!db) {
@@ -39,12 +48,17 @@ export const databaseService = {
                 .add(msgData);
 
             // Update last message in conversation doc
-            const conversationUpdate = {
+            const conversationUpdate: any = {
                 lastMessage: message.content,
                 lastActivity: admin.firestore.Timestamp.fromDate(message.timestamp),
-                phone: message.phone,
-                senderName: safeSenderName
+                phone: message.phone
             };
+
+            // ONLY update senderName/profile if the message is from the USER
+            // This prevents the bot (assistant) from overwriting the client's name with its own name
+            if (message.role === 'user') {
+                conversationUpdate.senderName = safeSenderName;
+            }
 
             await db.collection('conversations').doc(message.phone).set(conversationUpdate, { merge: true });
 
@@ -68,5 +82,16 @@ export const databaseService = {
             return;
         }
         await db.collection('sessions').doc(phone).set(data, { merge: true });
+    },
+
+    getAllConversations: async (): Promise<ConversationData[]> => {
+        if (!db) return [];
+        try {
+            const snapshot = await db.collection('conversations').get();
+            return snapshot.docs.map(doc => ({ phone: doc.id, ...doc.data() } as ConversationData));
+        } catch (error) {
+            console.error('[Database] Error getting all conversations:', error);
+            return [];
+        }
     }
 };
