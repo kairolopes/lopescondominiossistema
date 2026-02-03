@@ -41,19 +41,46 @@ export const userSeeder = {
                     password: u.password || '123456'
                 };
 
-                await userService.createSystemUser(userData);
-                console.log(`[Seeder] Synced user: ${u.email}`);
+                const existing = await userService.findSystemUserByEmail(u.email);
+                if (existing) {
+                    if (existing.id) {
+                        await userService.updateSystemUser(existing.id, {
+                            name: userData.name,
+                            role: userData.role,
+                            jobTitle: userData.jobTitle
+                        });
+                        console.log(`[Seeder] Updated user: ${u.email}`);
+                    }
+                } else {
+                    await userService.createSystemUser(userData);
+                    console.log(`[Seeder] Created user: ${u.email}`);
+                }
             }
 
             // Ensure Admin exists
-            await userService.createSystemUser({
+            const adminEmail = 'admin@lopes.com.br';
+            const existingAdmin = await userService.findSystemUserByEmail(adminEmail);
+            const adminData: SystemUser = {
                 name: 'Administrador',
-                email: 'admin@lopes.com.br',
+                email: adminEmail,
                 role: 'admin',
                 jobTitle: 'Administrativo',
                 password: '123456'
-            });
-            console.log(`[Seeder] Synced Admin.`);
+            };
+
+            if (existingAdmin) {
+                 if (existingAdmin.id) {
+                    await userService.updateSystemUser(existingAdmin.id, {
+                        name: adminData.name,
+                        role: adminData.role,
+                        jobTitle: adminData.jobTitle
+                    });
+                    console.log(`[Seeder] Updated Admin.`);
+                 }
+            } else {
+                await userService.createSystemUser(adminData);
+                console.log(`[Seeder] Created Admin.`);
+            }
 
         } catch (error) {
             console.error('[Seeder] Error during seeding:', error);
