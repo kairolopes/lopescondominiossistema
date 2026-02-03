@@ -59,6 +59,30 @@ export const authController = {
         }
     },
 
+    async updateUserById(req: Request, res: Response) {
+        try {
+            const requester = (req as any).user;
+            if (requester.role !== 'admin' && requester.role !== 'master') {
+                return res.status(403).json({ error: 'Permission denied' });
+            }
+
+            const { id } = req.params;
+            const { name, email, role, jobTitle, password } = req.body;
+            
+            await userService.updateSystemUser(id, { 
+                name, 
+                email, 
+                role, 
+                jobTitle,
+                ...(password ? { password } : {})
+            });
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Update user error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
     async createUser(req: Request, res: Response) {
         try {
             const { name, email, password, role, jobTitle } = req.body;

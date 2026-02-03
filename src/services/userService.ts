@@ -5,7 +5,7 @@ export interface SystemUser {
   name: string;
   email: string;
   password?: string; // In a real app, hash this!
-  role: 'admin' | 'agent';
+  role: 'master' | 'admin' | 'agent';
   jobTitle?: string; // Cargo personalizado para assinatura
 }
 
