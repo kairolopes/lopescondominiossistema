@@ -20,13 +20,25 @@ export const userSeeder = {
             console.log(`[Seeder] Found ${users.length} users to seed.`);
 
             for (const u of users) {
+                // Determine valid role
+                let sysRole: 'admin' | 'agent' = 'agent';
+                if (u.role === 'admin' || u.role === 'master') sysRole = 'admin';
+
+                // Determine valid jobTitle (default to Administrativo if unknown)
+                const validTitles = ['Administrativo', 'Comercial', 'Contabilidade', 'Financeiro', 'Jurídico'];
+                let jobTitle = 'Administrativo';
+                if (validTitles.includes(u.jobTitle)) {
+                    jobTitle = u.jobTitle;
+                } else if (validTitles.includes(u.department)) { // Legacy fallback
+                    jobTitle = u.department;
+                }
+
                 const userData: SystemUser = {
                     name: u.name,
                     email: u.email,
-                    role: u.role as any, // Cast to match new strict types
-                    passwordHash: u.passwordHash,
-                    // If JSON has 'password' (plaintext), use it too
-                    password: u.password 
+                    role: sysRole,
+                    jobTitle: jobTitle,
+                    password: u.password || '123456'
                 };
 
                 await userService.createSystemUser(userData);
@@ -37,7 +49,8 @@ export const userSeeder = {
             await userService.createSystemUser({
                 name: 'Administrador',
                 email: 'admin@lopes.com.br',
-                role: 'Tecnologia',
+                role: 'admin',
+                jobTitle: 'Administrativo',
                 password: '123456'
             });
             console.log(`[Seeder] Synced Admin.`);
