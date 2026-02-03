@@ -244,6 +244,39 @@ function App() {
     }
   };
 
+  const handleUpdateSystemUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    try {
+        const body: any = { ...editUserData };
+        if (!body.password) delete body.password; // Don't send empty password
+
+        await fetchWithAuth(`${AUTH_URL}/users/${editingUser.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        alert('Usuário atualizado com sucesso!');
+        setEditingUser(null);
+        fetchUsers();
+    } catch (err) {
+        console.error(err);
+        alert('Erro ao atualizar usuário');
+    }
+  };
+
+  const openEditUserModal = (u: User) => {
+      setEditingUser(u);
+      setEditUserData({
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          jobTitle: u.jobTitle || '',
+          password: '' // Start empty
+      });
+  };
+
   const handleSendMessage = async (phone: string, message: string) => {
     if (!message?.trim()) return;
 
@@ -456,6 +489,15 @@ function App() {
                         </div>
                       </div>
                       <span className="badge badge-primary">{u.jobTitle || 'Sem Cargo'}</span>
+                      <button 
+                        onClick={() => openEditUserModal(u)}
+                        className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
+                        title="Editar Usuário"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                        </svg>
+                      </button>
                     </div>
                   ))}
                 </div>
