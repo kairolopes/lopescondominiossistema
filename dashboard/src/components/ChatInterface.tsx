@@ -51,6 +51,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
+  const formatMessage = (text: string) => {
+    if (!text) return null;
+    return text.split('\n').map((line, i, arr) => (
+      <React.Fragment key={i}>
+        {line.split(/(\*[^*]+\*)/g).map((part, j) => {
+           if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+             return <strong key={j}>{part.slice(1, -1)}</strong>;
+           }
+           return part;
+        })}
+        {i < arr.length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
+
   const filteredSessions = sessions.filter(s => 
     s.phone.includes(searchTerm) || 
     s.history[s.history.length-1]?.content?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -249,7 +264,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         {msg.senderName}
                     </div>
                   )}
-                  {msg.content}
+                  {formatMessage(msg.content)}
                   <div style={{ 
                     fontSize: '10px', 
                     color: '#94a3b8', 
