@@ -18,11 +18,8 @@ import {
   Image as ImageIcon,
   FileText,
   Camera,
-  ArrowLeft,
   UserPlus,
-  Trash2,
-  Play,
-  Pause
+  Trash2
 } from 'lucide-react';
 
 interface ChatInterfaceProps {
